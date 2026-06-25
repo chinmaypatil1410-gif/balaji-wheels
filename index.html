@@ -1,0 +1,3040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BALAJI WHEELS – Premium Tyre Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── LOGIN SCREEN ── */
+#login-screen { position: fixed; inset: 0; z-index: 1000; background: #0a0a0a; display: flex; align-items: center; justify-content: center; }
+#login-screen.hidden { display: none; }
+.login-box { width: 100%; max-width: 380px; padding: 36px 32px; background: rgba(20,20,20,0.9); border: 1px solid rgba(255,107,0,0.18); border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.7); }
+.login-logo { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 28px; }
+.login-logo .logo-icon { width: 52px; height: 52px; font-size: 24px; }
+.login-logo-text { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; letter-spacing: 1.5px; color: #FF8C35; }
+.login-logo-sub { font-size: 10px; color: #555; letter-spacing: 2px; text-transform: uppercase; }
+.login-error { font-size: 12.5px; color: #F87171; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; display: none; }
+.login-error.show { display: block; }
+.login-tabs { display: flex; gap: 8px; margin-bottom: 20px; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 4px; }
+.login-tab { flex: 1; text-align: center; padding: 8px; font-size: 12.5px; font-weight: 600; border-radius: 6px; cursor: pointer; color: #999; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.4px; }
+.login-tab.active { background: rgba(255,107,0,0.15); color: #FF8C35; }
+#app-root { display: none; }
+#app-root.ready { display: block; }
+.fb-setup-banner { background: rgba(255,107,0,0.08); border: 1px solid rgba(255,107,0,0.25); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 12.5px; color: #FF8C35; line-height: 1.6; }
+.fb-setup-banner code { background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; font-size: 11.5px; }
+</style>
+<style>
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-card: rgba(20,20,20,0.85);
+  --bg-sidebar: #0d0d0d;
+  --orange: #FF6B00;
+  --orange-light: #FF8C35;
+  --orange-glow: rgba(255,107,0,0.25);
+  --silver: #C0C0C0;
+  --silver-light: #E8E8E8;
+  --gold: #B8860B;
+  --text-primary: #F0F0F0;
+  --text-secondary: #999;
+  --text-muted: #555;
+  --border: rgba(255,107,0,0.18);
+  --border-subtle: rgba(255,255,255,0.06);
+  --glass: rgba(255,255,255,0.04);
+  --shadow-orange: 0 0 30px rgba(255,107,0,0.15);
+  --shadow-card: 0 8px 32px rgba(0,0,0,0.6);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --sidebar-w: 260px;
+  --sidebar-collapsed: 72px;
+  --transition: 0.32s cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── ANIMATED BACKGROUND ── */
+#bg-canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.35;
+}
+
+/* ── SIDEBAR ── */
+#sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  z-index: 100;
+  display: flex; flex-direction: column;
+  transition: width var(--transition);
+  overflow: hidden;
+}
+#sidebar.collapsed { width: var(--sidebar-collapsed); }
+.sidebar-logo {
+  display: flex; align-items: center; gap: 12px;
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap; overflow: hidden;
+  min-height: 72px;
+}
+.logo-icon {
+  width: 38px; height: 38px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--orange), #FF3D00);
+  border-radius: 10px;
+  display: grid; place-items: center;
+  font-size: 18px; color: #fff;
+  box-shadow: 0 4px 15px rgba(255,107,0,0.4);
+}
+.logo-text { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; letter-spacing: 1.5px; line-height: 1.3; color: var(--orange-light); }
+.logo-sub { font-size: 9px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; }
+
+.nav-section-label {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text-muted); padding: 18px 22px 6px;
+  white-space: nowrap; overflow: hidden;
+}
+#sidebar.collapsed .nav-section-label { visibility: hidden; }
+.nav-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 20px;
+  cursor: pointer;
+  border-radius: 0;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap; overflow: hidden;
+  position: relative;
+}
+.nav-item:hover { background: rgba(255,107,0,0.07); border-left-color: rgba(255,107,0,0.3); }
+.nav-item.active {
+  background: rgba(255,107,0,0.12);
+  border-left-color: var(--orange);
+}
+.nav-item.active .nav-label { color: var(--orange-light); font-weight: 600; }
+.nav-icon { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; font-size: 15px; color: var(--text-secondary); border-radius: var(--radius-sm); }
+.nav-item.active .nav-icon { color: var(--orange); }
+.nav-label { font-size: 13.5px; color: var(--text-secondary); letter-spacing: 0.3px; }
+.nav-badge { margin-left: auto; background: var(--orange); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+.sidebar-footer {
+  margin-top: auto; padding: 16px 20px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex; align-items: center; gap: 12px;
+  white-space: nowrap; overflow: hidden;
+}
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg,#FF6B00,#FF3D00); display: grid; place-items: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.user-name { font-size: 13px; font-weight: 600; }
+.user-role { font-size: 11px; color: var(--text-muted); }
+
+/* ── TOPBAR ── */
+#topbar {
+  position: fixed; top: 0; right: 0;
+  left: var(--sidebar-w);
+  height: 64px;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 90;
+  display: flex; align-items: center;
+  padding: 0 28px;
+  gap: 16px;
+  transition: left var(--transition);
+}
+#topbar.collapsed { left: var(--sidebar-collapsed); }
+.hamburger { cursor: pointer; padding: 8px; border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 18px; transition: color 0.2s; }
+.hamburger:hover { color: var(--orange); }
+.page-title { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.5px; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.topbar-btn { width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--glass); border: 1px solid var(--border-subtle); display: grid; place-items: center; cursor: pointer; color: var(--text-secondary); font-size: 15px; transition: all 0.2s; position: relative; }
+.topbar-btn:hover { color: var(--orange); border-color: var(--orange); }
+.notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--orange); border-radius: 50%; border: 2px solid var(--bg-primary); }
+.search-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--glass); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: 0 14px;
+  height: 38px; width: 220px;
+}
+.search-bar input { background: none; border: none; outline: none; color: var(--text-primary); font-size: 13px; width: 100%; }
+.search-bar i { color: var(--text-muted); font-size: 13px; }
+
+/* ── MAIN CONTENT ── */
+#main {
+  margin-left: var(--sidebar-w);
+  margin-top: 64px;
+  padding: 28px;
+  min-height: calc(100vh - 64px);
+  transition: margin-left var(--transition);
+  position: relative; z-index: 1;
+}
+#main.collapsed { margin-left: var(--sidebar-collapsed); }
+
+/* ── PAGE SECTIONS ── */
+.page { display: none; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  position: relative; overflow: hidden;
+}
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--orange), transparent); opacity: 0.5; }
+
+/* ── STAT CARDS ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px; margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 22px;
+  position: relative; overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-orange); border-color: rgba(255,107,0,0.3); }
+.stat-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--orange), var(--orange-light)); }
+.stat-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 18px; margin-bottom: 14px; }
+.stat-icon.orange { background: rgba(255,107,0,0.15); color: var(--orange); }
+.stat-icon.blue { background: rgba(59,130,246,0.15); color: #60A5FA; }
+.stat-icon.green { background: rgba(34,197,94,0.15); color: #4ADE80; }
+.stat-icon.purple { background: rgba(168,85,247,0.15); color: #C084FC; }
+.stat-icon.red { background: rgba(239,68,68,0.15); color: #F87171; }
+.stat-icon.teal { background: rgba(20,184,166,0.15); color: #2DD4BF; }
+.stat-value { font-family: 'Rajdhani', sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+.stat-label { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.8px; }
+.stat-change { font-size: 11px; margin-top: 8px; }
+.stat-change.up { color: #4ADE80; }
+.stat-change.down { color: #F87171; }
+
+/* ── SECTION HEADER ── */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.section-title { font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.5px; }
+.section-title span { color: var(--orange); }
+.section-action { font-size: 12px; color: var(--orange); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+/* ── CHARTS GRID ── */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+@media(max-width:900px) { .charts-grid { grid-template-columns: 1fr; } }
+
+/* ── KPI GRID VARIANTS ── */
+.stats-grid-8 { grid-template-columns: repeat(4, 1fr); }
+@media(max-width:1200px) { .stats-grid-8 { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:560px) { .stats-grid-8 { grid-template-columns: 1fr; } }
+.stats-grid-3 { grid-template-columns: repeat(3, 1fr); }
+@media(max-width:760px) { .stats-grid-3 { grid-template-columns: 1fr; } }
+
+/* ── MASTER FILTER BAR ── */
+.filter-master-card { margin-bottom: 24px; }
+.filter-bar {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  padding: 16px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  margin-bottom: 22px;
+}
+@media(max-width:1100px) { .filter-bar { grid-template-columns: repeat(3, 1fr); } }
+@media(max-width:640px) { .filter-bar { grid-template-columns: repeat(2, 1fr); } }
+.filter-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.filter-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+.filter-select {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  color-scheme: dark;
+}
+.filter-select:focus, .filter-select:hover { border-color: var(--border); }
+.filter-select option { background: #1a1a1a; }
+.filter-group-view .filter-select-view {
+  border-color: var(--orange);
+  background: rgba(255,107,0,0.08);
+  color: var(--orange-light);
+  font-weight: 600;
+}
+.graph-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.graph-meta-title { font-family: 'Rajdhani', sans-serif; font-size: 19px; font-weight: 700; color: var(--text-primary); }
+.graph-meta-sub { font-size: 12px; color: var(--text-muted); }
+.chart-wrap-lg { height: 300px; }
+
+/* ── BUSINESS INTELLIGENCE GRID ── */
+.bi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 24px; }
+@media(max-width:900px) { .bi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:560px) { .bi-grid { grid-template-columns: 1fr; } }
+.bi-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative; overflow: hidden;
+}
+.bi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0.5; }
+.bi-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(184,134,11,0.15); color: var(--gold); display: grid; place-items: center; font-size: 16px; }
+.bi-value { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; color: var(--text-primary); line-height: 1.15; }
+.bi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; }
+
+/* ── TABLE ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { padding: 10px 16px; text-align: left; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+.data-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-secondary); vertical-align: middle; }
+.data-table tr:hover td { background: rgba(255,107,0,0.03); }
+.data-table tr:last-child td { border-bottom: none; }
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-orange { background: rgba(255,107,0,0.15); color: var(--orange-light); }
+.badge-green { background: rgba(74,222,128,0.12); color: #4ADE80; }
+.badge-blue { background: rgba(96,165,250,0.12); color: #60A5FA; }
+.badge-red { background: rgba(248,113,113,0.12); color: #F87171; }
+.badge-purple { background: rgba(192,132,252,0.12); color: #C084FC; }
+
+/* ── QUICK ACTIONS ── */
+.quick-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.qa-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(255,107,0,0.06);
+  color: var(--orange-light);
+  cursor: pointer; font-size: 13.5px; font-weight: 600;
+  transition: all 0.2s; white-space: nowrap;
+  font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px;
+}
+.qa-btn:hover { background: rgba(255,107,0,0.15); border-color: var(--orange); box-shadow: 0 0 20px rgba(255,107,0,0.2); transform: translateY(-1px); }
+.qa-btn i { font-size: 15px; }
+
+/* ── BRAND STATS ── */
+.brands-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.brand-card {
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-subtle);
+  text-align: center; transition: all 0.2s;
+}
+.brand-card:hover { border-color: var(--orange); background: rgba(255,107,0,0.06); }
+.brand-name { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.brand-bar-wrap { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-bottom: 6px; overflow: hidden; }
+.brand-bar { height: 100%; border-radius: 2px; transition: width 1s ease; }
+.brand-count { font-size: 11px; color: var(--text-muted); }
+
+/* ── FORM STYLES ── */
+.form-section-title { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; color: var(--orange-light); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 8px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media(max-width:600px) { .form-grid { grid-template-columns: 1fr; } }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 11.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+.form-input, .form-select, .form-textarea {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(255,107,0,0.1);
+}
+.form-select option { background: #1a1a1a; }
+.form-textarea { resize: vertical; min-height: 80px; }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, var(--orange), #FF3D00); color: #fff; box-shadow: 0 4px 15px rgba(255,107,0,0.35); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(255,107,0,0.5); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+.btn-outline:hover { border-color: var(--orange); color: var(--orange-light); }
+.btn-danger { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #F87171; }
+.btn-danger:hover { background: rgba(239,68,68,0.25); }
+.btn-success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ADE80; }
+.btn-sm { padding: 7px 14px; font-size: 12px; }
+.form-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); }
+
+/* ── STEP WIZARD ── */
+.wizard-steps { display: flex; align-items: center; margin-bottom: 32px; gap: 0; }
+.wizard-step { display: flex; align-items: center; flex: 1; }
+.step-circle { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; border: 2px solid var(--border-subtle); color: var(--text-muted); background: var(--bg-secondary); flex-shrink: 0; transition: all 0.3s; font-family: 'Rajdhani',sans-serif; }
+.step-circle.active { border-color: var(--orange); background: var(--orange); color: #fff; box-shadow: 0 0 15px rgba(255,107,0,0.4); }
+.step-circle.done { border-color: #4ADE80; background: rgba(74,222,128,0.15); color: #4ADE80; }
+.step-line { flex: 1; height: 2px; background: var(--border-subtle); margin: 0 8px; }
+.step-line.done { background: var(--orange); }
+.step-info { margin-left: 8px; min-width: 0; display: none; }
+@media(min-width:600px) { .step-info { display: block; } }
+.step-num { font-size: 10px; color: var(--text-muted); }
+.step-name { font-size: 12px; color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
+
+/* ── WIZARD PAGES ── */
+.wizard-page { display: none; }
+.wizard-page.active { display: block; animation: fadeIn 0.3s ease; }
+
+/* ── TOGGLE SWITCH ── */
+.toggle-wrap { display: flex; align-items: center; gap: 12px; }
+.toggle { position: relative; width: 44px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 24px; cursor: pointer; transition: 0.3s; border: 1px solid var(--border-subtle); }
+.toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 2px; bottom: 2px; background: var(--text-muted); border-radius: 50%; transition: 0.3s; }
+.toggle input:checked + .toggle-slider { background: rgba(255,107,0,0.25); border-color: var(--orange); }
+.toggle input:checked + .toggle-slider:before { transform: translateX(20px); background: var(--orange); box-shadow: 0 0 8px rgba(255,107,0,0.5); }
+.toggle-label { font-size: 13px; color: var(--text-secondary); }
+
+/* ── NOTIFICATION CARDS ── */
+.notif-list { display: flex; flex-direction: column; gap: 10px; }
+.notif-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+.notif-item:hover { background: rgba(255,107,0,0.04); border-left-color: var(--orange); }
+.notif-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font-size: 14px; flex-shrink: 0; }
+.notif-content { flex: 1; min-width: 0; }
+.notif-title { font-size: 13.5px; font-weight: 600; margin-bottom: 3px; }
+.notif-desc { font-size: 12px; color: var(--text-muted); }
+.notif-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+/* ── AUTOMATION CARDS ── */
+.automation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.auto-card { background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 22px; transition: all 0.2s; }
+.auto-card:hover { border-color: rgba(255,107,0,0.3); }
+.auto-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.auto-card-icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 16px; }
+.auto-card-title { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; }
+.auto-card-sub { font-size: 11px; color: var(--text-muted); }
+.auto-options { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── REPORTING ── */
+.report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.report-btn {
+  padding: 20px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer; text-align: center;
+  transition: all 0.2s;
+}
+.report-btn:hover { background: rgba(255,107,0,0.08); border-color: var(--orange); transform: translateY(-2px); }
+.report-btn i { font-size: 24px; color: var(--orange); margin-bottom: 10px; display: block; }
+.report-btn-title { font-size: 13.5px; font-weight: 600; }
+.report-btn-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+/* ── SETTINGS ── */
+.settings-section { margin-bottom: 28px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-subtle); gap: 20px; }
+.settings-row:last-child { border-bottom: none; }
+.settings-info .settings-name { font-size: 13.5px; font-weight: 600; }
+.settings-info .settings-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── TOAST ── */
+#toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: var(--radius-sm); backdrop-filter: blur(20px); border: 1px solid; font-size: 13.5px; font-weight: 500; animation: slideIn 0.3s ease; min-width: 260px; box-shadow: var(--shadow-card); }
+.toast.success { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.3); color: #4ADE80; }
+.toast.error { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.3); color: #F87171; }
+.toast.info { background: rgba(255,107,0,0.1); border-color: rgba(255,107,0,0.3); color: var(--orange-light); }
+@keyframes slideIn { from { opacity:0; transform: translateX(30px); } to { opacity:1; transform: translateX(0); } }
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px) {
+  :root { --sidebar-w: 260px; }
+  #sidebar { transform: translateX(-100%); transition: transform var(--transition); }
+  #sidebar.mobile-open { transform: translateX(0); }
+  #topbar { left: 0 !important; }
+  #main { margin-left: 0 !important; }
+  #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(4px); }
+  #sidebar-overlay.active { display: block; }
+}
+
+/* ── CANVAS BARS (Chart) ── */
+.chart-wrap { position: relative; height: 220px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 100%; padding: 0 4px; }
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 1s ease; position: relative; cursor: pointer; }
+.bar:hover::after { content: attr(data-val); position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-secondary); white-space: nowrap; }
+.bar-label { font-size: 10px; color: var(--text-muted); text-align: center; }
+
+/* Donut */
+.donut-wrap { display: flex; align-items: center; gap: 20px; }
+.donut-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-pct { margin-left: auto; font-weight: 700; color: var(--text-primary); }
+
+/* ── TABLE SEARCH ── */
+.table-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+.table-search { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 7px 12px; }
+.table-search input { background: none; border: none; outline: none; color: var(--text-primary); font-size: 13px; width: 180px; }
+.table-search i { color: var(--text-muted); font-size: 13px; }
+
+/* ── LOADING ── */
+.spinner { width: 20px; height: 20px; border: 2px solid rgba(255,107,0,0.2); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* misc */
+.flex { display: flex; } .items-center { align-items: center; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; }
+.mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; } .text-orange { color: var(--orange); }
+.text-sm { font-size: 12px; } .text-muted { color: var(--text-muted); }
+.mb-4 { margin-bottom: 16px; } .mb-6 { margin-bottom: 24px; }
+
+/* ── RBAC: ROLE BADGE ── */
+.role-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 20px;
+}
+.role-badge.owner { background: rgba(255,107,0,0.18); color: var(--orange-light); border: 1px solid rgba(255,107,0,0.35); }
+.role-badge.manager { background: rgba(96,165,250,0.15); color: #60A5FA; border: 1px solid rgba(96,165,250,0.3); }
+
+/* ── RBAC: ACCESS DENIED OVERLAY ── */
+#access-denied-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(10,10,10,0.97); backdrop-filter: blur(12px);
+  align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+  animation: fadeIn 0.3s ease;
+}
+#access-denied-overlay.show { display: flex; }
+.denied-icon { width: 80px; height: 80px; border-radius: 50%; background: rgba(248,113,113,0.12); border: 2px solid rgba(248,113,113,0.35); display: grid; place-items: center; font-size: 32px; color: #F87171; margin-bottom: 8px; }
+.denied-title { font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900; color: #F87171; letter-spacing: 1px; }
+.denied-sub { font-size: 13.5px; color: var(--text-secondary); text-align: center; max-width: 360px; line-height: 1.6; }
+.denied-redirect { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* ── RBAC: USER MANAGEMENT TABLE ── */
+.user-table-row { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 12px; align-items: center; padding: 13px 16px; border-bottom: 1px solid var(--border-subtle); font-size: 13px; }
+.user-table-row:last-child { border-bottom: none; }
+.user-table-head { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 12px; }
+.role-select-inline { background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 5px 10px; border-radius: 6px; font-size: 12px; outline: none; cursor: pointer; font-family: 'Inter', sans-serif; color-scheme: dark; }
+.role-select-inline:focus { border-color: var(--orange); }
+
+/* ── PERMISSION PANEL ── */
+.perm-panel { display:none; border-top:1px solid var(--border-subtle); padding:18px 16px; background:rgba(255,255,255,0.02); }
+.perm-panel.open { display:block; animation:fadeIn 0.2s ease; }
+.perm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:10px; margin-top:12px; }
+.perm-item { display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,0.04); border:1px solid var(--border-subtle); border-radius:8px; padding:10px 12px; transition:all 0.2s; }
+.perm-item.on { border-color:rgba(255,107,0,0.4); background:rgba(255,107,0,0.08); }
+.perm-label { font-size:12px; font-weight:500; display:flex; align-items:center; gap:7px; }
+.perm-label i { width:14px; color:var(--orange); opacity:0.8; font-size:11px; }
+.user-row-wrap { border:1px solid var(--border-subtle); border-radius:10px; margin-bottom:10px; overflow:hidden; }
+.user-row-wrap:last-child { margin-bottom:0; }
+.user-table-row { border-bottom:none; }
+
+/* rebuild table head to 5 cols */
+.user-table-head { grid-template-columns: 2fr 1fr auto auto auto !important; }
+.user-table-row  { grid-template-columns: 2fr 1fr auto auto auto !important; }
+
+.nav-item.owner-only { transition: opacity 0.2s, max-height 0.2s; }
+.nav-item.owner-only.hidden-for-role { opacity: 0; pointer-events: none; max-height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN / AUTH SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-icon"><i class="fa-solid fa-tire"></i></div>
+      <div class="login-logo-text">BALAJI WHEELS</div>
+      <div class="login-logo-sub">Premium Tyre Management</div>
+    </div>
+    <div id="fb-config-warning" class="fb-setup-banner" style="display:none">
+      <i class="fa-solid fa-triangle-exclamation"></i> Firebase isn't configured yet. Open this file and fill in <code>firebaseConfig</code> near the top of the script with your project's keys, and create a user in Firebase Authentication (Email/Password) to log in.
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="form-group mb-4"><label class="form-label">Email</label><input class="form-input" type="email" id="login-email" placeholder="staff@balajiwheels.com"></div>
+    <div class="form-group mb-4"><label class="form-label">Password</label><input class="form-input" type="password" id="login-password" placeholder="••••••••"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" id="login-btn" onclick="doLogin()"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+    <div style="text-align:center;margin-top:16px;font-size:11.5px;color:var(--text-muted)">Ask your admin for staff login credentials.</div>
+  </div>
+</div>
+
+<div id="app-root">
+
+<!-- ANIMATED BACKGROUND -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon"><i class="fa-solid fa-tire"></i></div>
+    <div>
+      <div class="logo-text">BALAJI WHEELS</div>
+      <div class="logo-sub">Premium Tyre Management</div>
+    </div>
+  </div>
+
+  <div class="nav-section-label">CORE</div>
+  <div class="nav-item active owner-only" id="nav-dashboard" onclick="navigate('dashboard',this)" data-page="dashboard" data-role-required="owner">
+    <div class="nav-icon"><i class="fa-solid fa-gauge-high"></i></div>
+    <span class="nav-label">Dashboard</span>
+  </div>
+  <div class="nav-item" onclick="navigate('customers',this)" data-page="customers">
+    <div class="nav-icon"><i class="fa-solid fa-address-book"></i></div>
+    <span class="nav-label">Customers</span>
+  </div>
+  <div class="nav-item" onclick="navigate('registration',this)" data-page="registration">
+    <div class="nav-icon"><i class="fa-solid fa-user-plus"></i></div>
+    <span class="nav-label">New Registration</span>
+  </div>
+
+
+  <div class="nav-section-label">INSIGHTS</div>
+  <div class="nav-item" onclick="navigate('reporting',this)" data-page="reporting">
+    <div class="nav-icon"><i class="fa-solid fa-chart-bar"></i></div>
+    <span class="nav-label">Reporting</span>
+  </div>
+  <div class="nav-item" onclick="navigate('notifications',this)" data-page="notifications">
+    <div class="nav-icon"><i class="fa-solid fa-bell"></i></div>
+    <span class="nav-label">Notifications</span>
+  </div>
+
+  <div class="nav-section-label">SYSTEM</div>
+  <div class="nav-item" onclick="navigate('automation',this)" data-page="automation">
+    <div class="nav-icon"><i class="fa-solid fa-robot"></i></div>
+    <span class="nav-label">Automation</span>
+  </div>
+  <div class="nav-item" onclick="navigate('settings',this)" data-page="settings">
+    <div class="nav-icon"><i class="fa-solid fa-gear"></i></div>
+    <span class="nav-label">Settings</span>
+  </div>
+  <div class="nav-item owner-only" id="nav-user-management" onclick="navigate('user-management',this)" data-page="user-management" data-role-required="owner">
+    <div class="nav-icon"><i class="fa-solid fa-users-gear"></i></div>
+    <span class="nav-label">User Management</span>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-avatar" id="sidebar-avatar">BW</div>
+    <div>
+      <div class="user-name" id="sidebar-user-name">Admin User</div>
+      <div class="user-role" id="sidebar-user-role">Loading...</div>
+    </div>
+  </div>
+</nav>
+
+<!-- TOPBAR -->
+<header id="topbar">
+  <div class="hamburger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+  <div class="page-title" id="page-title">Dashboard</div>
+  <div class="topbar-right">
+    <div class="search-bar" style="position:relative">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="global-search-input" placeholder="Search customers, vehicles..." oninput="handleGlobalSearch(this.value)" onfocus="if(this.value)handleGlobalSearch(this.value)">
+      <div id="global-search-results" style="display:none;position:absolute;top:46px;right:0;width:340px;max-height:400px;overflow-y:auto;background:#161616;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-card);z-index:200"></div>
+    </div>
+    <div class="topbar-btn" id="logout-btn" onclick="doLogout()" title="Sign out"><i class="fa-solid fa-right-from-bracket"></i></div>
+    <div class="topbar-btn"><i class="fa-solid fa-circle-user"></i></div>
+  </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main id="main">
+
+<!-- ════════════════════════════════
+     DASHBOARD PAGE
+═════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <div class="qa-btn" onclick="navigate('registration',document.querySelector('[data-page=registration]'))"><i class="fa-solid fa-user-plus"></i> New Registration</div>
+    <div class="qa-btn" onclick="navigate('reporting',document.querySelector('[data-page=reporting]'))"><i class="fa-solid fa-file-export"></i> Generate Report</div>
+  </div>
+
+  <!-- ROW 1 — EXECUTIVE KPI CARDS -->
+  <div class="stats-grid stats-grid-8">
+    <div class="stat-card">
+      <div class="stat-icon teal"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+      <div class="stat-value" id="kpi-sales-today">₹0</div>
+      <div class="stat-label">Sales Today</div>
+      <div class="stat-change" id="kpi-sales-today-chg" style="color:var(--text-muted)"><i class="fa-solid fa-minus"></i> No data yet</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange"><i class="fa-solid fa-users"></i></div>
+      <div class="stat-value" id="kpi-customers-today">0</div>
+      <div class="stat-label">Customers Today</div>
+      <div class="stat-change" id="kpi-customers-today-chg" style="color:var(--text-muted)"><i class="fa-solid fa-minus"></i> No data yet</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fa-solid fa-tire"></i></div>
+      <div class="stat-value" id="kpi-tyres-today">0</div>
+      <div class="stat-label">Tyres Fitted Today</div>
+      <div class="stat-change" id="kpi-tyres-today-chg" style="color:var(--text-muted)"><i class="fa-solid fa-minus"></i> No data yet</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fa-solid fa-arrows-left-right-to-line"></i></div>
+      <div class="stat-value" id="kpi-alignment-today">0</div>
+      <div class="stat-label">Alignment Jobs</div>
+      <div class="stat-change" id="kpi-alignment-today-chg" style="color:var(--text-muted)"><i class="fa-solid fa-minus"></i> No data yet</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="fa-solid fa-weight-scale"></i></div>
+      <div class="stat-value" id="kpi-balancing-today">0</div>
+      <div class="stat-label">Balancing Jobs</div>
+      <div class="stat-change" id="kpi-balancing-today-chg" style="color:var(--text-muted)"><i class="fa-solid fa-minus"></i> No data yet</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red"><i class="fa-solid fa-clock"></i></div>
+      <div class="stat-value" id="kpi-followups">0</div>
+      <div class="stat-label">Pending Follow-ups</div>
+      <div class="stat-change" style="color:var(--text-muted)"><i class="fa-solid fa-minus"></i> No pending items</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon teal"><i class="fa-solid fa-calendar-week"></i></div>
+      <div class="stat-value" id="kpi-sales-month">₹0</div>
+      <div class="stat-label">Sales This Month</div>
+      <div class="stat-change" id="kpi-sales-month-chg" style="color:var(--text-muted)"><i class="fa-solid fa-minus"></i> No data yet</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange"><i class="fa-solid fa-rotate-right"></i></div>
+      <div class="stat-value" id="kpi-repeat-pct">0%</div>
+      <div class="stat-label">Repeat Customer Rate</div>
+      <div class="stat-change" id="kpi-repeat-pct-chg" style="color:var(--text-muted)"><i class="fa-solid fa-minus"></i> No data yet</div>
+    </div>
+  </div>
+
+  <!-- ROW 2 — MASTER FILTER BAR + DYNAMIC GRAPH -->
+  <div class="card filter-master-card">
+    <div class="section-header">
+      <div class="section-title">Smart Analytics <span>Engine</span></div>
+      <div class="section-action" id="filter-reset-btn" onclick="resetDashboardFilters()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset Filters</div>
+    </div>
+
+    <div class="filter-bar" id="filter-bar">
+      <div class="filter-group">
+        <label class="filter-label">Date Range</label>
+        <select class="filter-select" id="f-date" onchange="onFilterChange('date')">
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="week">This Week</option>
+          <option value="month" selected>This Month</option>
+          <option value="quarter">This Quarter</option>
+          <option value="year">This Year</option>
+          <option value="custom">Custom Range</option>
+        </select>
+      </div>
+      <div class="filter-group" id="f-custom-range-group" style="display:none">
+        <label class="filter-label">Custom Range</label>
+        <div style="display:flex;gap:6px">
+          <input type="date" class="filter-select" id="f-date-from" onchange="onFilterChange('date')" style="padding:8px 8px">
+          <input type="date" class="filter-select" id="f-date-to" onchange="onFilterChange('date')" style="padding:8px 8px">
+        </div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Vehicle Type</label>
+        <select class="filter-select" id="f-vehicle" onchange="onFilterChange('vehicle')">
+          <option value="all">All Vehicles</option>
+          <option>Hatchback</option><option>Sedan</option><option>SUV</option><option>Luxury</option><option>Commercial</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Brand</label>
+        <select class="filter-select" id="f-brand" onchange="onFilterChange('brand')">
+          <option value="all">All Brands</option>
+          <option>Yokohama</option><option>Bridgestone</option><option>Goodyear</option><option>JK Tyre</option><option>Apollo</option><option>Pirelli</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Service</label>
+        <select class="filter-select" id="f-service" onchange="onFilterChange('service')">
+          <option value="all">All Services</option>
+          <option value="alignment">Alignment</option>
+          <option value="balancing">Balancing</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Customer Type</label>
+        <select class="filter-select" id="f-custtype" onchange="onFilterChange('custtype')">
+          <option value="all">All Customers</option>
+          <option value="new">New Customers</option>
+          <option value="repeat">Repeat Customers</option>
+        </select>
+      </div>
+      <div class="filter-group filter-group-view">
+        <label class="filter-label">Data View <span style="color:var(--orange)">●</span></label>
+        <select class="filter-select filter-select-view" id="f-view" onchange="onFilterChange('view')">
+          <option value="sales">Sales Revenue</option>
+          <option value="tyres">Tyres Sold</option>
+          <option value="services">Services Revenue</option>
+          <option value="customers">Customers Added</option>
+          <option value="repeat">Repeat Customers</option>
+          <option value="brand">Brand Performance</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="graph-meta" id="graph-meta">
+      <div class="graph-meta-title" id="graph-title">Sales Revenue Trend</div>
+      <div class="graph-meta-sub" id="graph-subtitle">Showing this month · all brands · all vehicles</div>
+    </div>
+    <div class="chart-wrap chart-wrap-lg">
+      <div class="bar-chart" id="smart-chart"></div>
+    </div>
+  </div>
+
+  <!-- ROW 3 — TOP INSIGHTS PANEL -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Top Selling <span>Brands</span></div>
+      </div>
+      <div class="brands-grid" id="top-brands-grid">
+        <div class="brand-card"><div class="brand-name" style="color:#E8B400">Yokohama</div><div class="brand-bar-wrap"><div class="brand-bar" style="background:#E8B400;width:0%"></div></div><div class="brand-count">0 units</div></div>
+        <div class="brand-card"><div class="brand-name" style="color:#E53E3E">Bridgestone</div><div class="brand-bar-wrap"><div class="brand-bar" style="background:#E53E3E;width:0%"></div></div><div class="brand-count">0 units</div></div>
+        <div class="brand-card"><div class="brand-name" style="color:#FF6B00">Apollo</div><div class="brand-bar-wrap"><div class="brand-bar" style="background:#FF6B00;width:0%"></div></div><div class="brand-count">0 units</div></div>
+        <div class="brand-card"><div class="brand-name" style="color:#3182CE">JK Tyre</div><div class="brand-bar-wrap"><div class="brand-bar" style="background:#3182CE;width:0%"></div></div><div class="brand-count">0 units</div></div>
+        <div class="brand-card"><div class="brand-name" style="color:#38A169">Goodyear</div><div class="brand-bar-wrap"><div class="brand-bar" style="background:#38A169;width:0%"></div></div><div class="brand-count">0 units</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Service <span>Revenue</span></div>
+      </div>
+      <div class="brands-grid" id="service-revenue-grid">
+        <div class="brand-card"><div class="brand-name" style="color:#FF6B00">Alignment Revenue</div><div class="brand-bar-wrap"><div class="brand-bar" style="background:#FF6B00;width:0%"></div></div><div class="brand-count">₹0</div></div>
+        <div class="brand-card"><div class="brand-name" style="color:#60A5FA">Balancing Revenue</div><div class="brand-bar-wrap"><div class="brand-bar" style="background:#60A5FA;width:0%"></div></div><div class="brand-count">₹0</div></div>
+        <div class="brand-card"><div class="brand-name" style="color:#4ADE80">Tyre Sales Revenue</div><div class="brand-bar-wrap"><div class="brand-bar" style="background:#4ADE80;width:0%"></div></div><div class="brand-count">₹0</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4 — ACTION CENTER -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Upcoming <span>Reminders</span></div>
+      </div>
+      <div class="notif-list" id="action-reminders-list">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 20px;background:rgba(255,255,255,0.02);border:1px solid var(--border-subtle);border-radius:var(--radius-sm)">
+          <i class="fa-solid fa-bell-slash" style="font-size:26px;color:var(--text-muted);opacity:0.4"></i>
+          <div style="font-size:13px;color:var(--text-muted);text-align:center">No reminders due</div>
+          <div style="font-size:11px;color:var(--text-muted);text-align:center">Alignment, rotation & warranty alerts will appear here</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Pending <span>Follow-ups</span></div>
+      </div>
+      <div class="notif-list" id="action-followups-list">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 20px;background:rgba(255,255,255,0.02);border:1px solid var(--border-subtle);border-radius:var(--radius-sm)">
+          <i class="fa-solid fa-clipboard-list" style="font-size:26px;color:var(--text-muted);opacity:0.4"></i>
+          <div style="font-size:13px;color:var(--text-muted);text-align:center">No pending follow-ups</div>
+          <div style="font-size:11px;color:var(--text-muted);text-align:center">Calls, feedback & WhatsApp follow-ups will show here</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 6 — CUSTOMER INTELLIGENCE -->
+  <div class="section-header mb-4" style="margin-top:8px">
+    <div class="section-title">Customer <span>Intelligence</span></div>
+  </div>
+  <div class="stats-grid stats-grid-3">
+    <div class="stat-card">
+      <div class="stat-icon orange"><i class="fa-solid fa-user-plus"></i></div>
+      <div class="stat-value" id="ci-new-customers">0</div>
+      <div class="stat-label">New Customers</div>
+      <div class="stat-change" style="color:var(--text-muted)" id="ci-new-customers-sub">In selected period</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fa-solid fa-rotate"></i></div>
+      <div class="stat-value" id="ci-repeat-customers">0</div>
+      <div class="stat-label">Repeat Customers</div>
+      <div class="stat-change" style="color:var(--text-muted)" id="ci-repeat-customers-sub">In selected period</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fa-solid fa-heart"></i></div>
+      <div class="stat-value" id="ci-retention-pct">0%</div>
+      <div class="stat-label">Customer Retention</div>
+      <div class="stat-change" style="color:var(--text-muted)" id="ci-retention-pct-sub">Of all-time customers</div>
+    </div>
+  </div>
+
+  <!-- ROW 7 — BUSINESS INTELLIGENCE -->
+  <div class="section-header mb-4" style="margin-top:8px">
+    <div class="section-title">Business <span>Intelligence</span></div>
+  </div>
+  <div class="bi-grid">
+    <div class="bi-card">
+      <div class="bi-icon"><i class="fa-solid fa-ruler-combined"></i></div>
+      <div class="bi-value" id="bi-best-size">—</div>
+      <div class="bi-label">Best Selling Size</div>
+    </div>
+    <div class="bi-card">
+      <div class="bi-icon"><i class="fa-solid fa-crown"></i></div>
+      <div class="bi-value" id="bi-top-brand">—</div>
+      <div class="bi-label">Most Popular Brand</div>
+    </div>
+    <div class="bi-card">
+      <div class="bi-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+      <div class="bi-value" id="bi-top-service">—</div>
+      <div class="bi-label">Most Booked Service</div>
+    </div>
+    <div class="bi-card">
+      <div class="bi-icon"><i class="fa-solid fa-receipt"></i></div>
+      <div class="bi-value" id="bi-avg-bill">₹0</div>
+      <div class="bi-label">Average Bill Value</div>
+    </div>
+    <div class="bi-card">
+      <div class="bi-icon"><i class="fa-solid fa-user-tag"></i></div>
+      <div class="bi-value" id="bi-rev-per-customer">₹0</div>
+      <div class="bi-label">Revenue Per Customer</div>
+    </div>
+    <div class="bi-card">
+      <div class="bi-icon"><i class="fa-solid fa-car-side"></i></div>
+      <div class="bi-value" id="bi-rev-per-vehicle">₹0</div>
+      <div class="bi-label">Revenue Per Vehicle</div>
+    </div>
+  </div>
+
+  <!-- Recent Registrations -->
+  <div class="card" style="margin-top:24px">
+    <div class="section-header">
+      <div class="section-title">Recent <span>Registrations</span></div>
+      <div class="section-action" onclick="navigate('customers',document.querySelector('[data-page=customers]'))"><i class="fa-solid fa-arrow-right"></i> View All</div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead><tr><th>Customer</th><th>Vehicle</th><th>Mobile</th><th>Brand</th><th>Date</th></tr></thead>
+      <tbody id="recent-registrations-body">
+        <tr><td colspan="5" style="text-align:center;padding:32px 16px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0.45">
+            <i class="fa-solid fa-inbox" style="font-size:28px;color:var(--text-muted)"></i>
+            <div style="font-size:13px;color:var(--text-muted)">No registrations yet</div>
+            <div style="font-size:11px;color:var(--text-muted)">New entries will appear here after registration</div>
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     CUSTOMERS LIST PAGE
+═════════════════════════════════ -->
+<div class="page" id="page-customers">
+  <div class="card">
+    <div class="table-toolbar">
+      <div class="section-title">Customer <span>Directory</span></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="table-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="customers-list-search" placeholder="Search name or mobile..." oninput="renderCustomersList()"></div>
+        <button class="btn btn-primary btn-sm" onclick="navigate('registration',document.querySelector('[data-page=registration]'))"><i class="fa-solid fa-user-plus"></i> New Customer</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Mobile</th><th>Vehicles</th><th>Last Visit</th><th>Total Spend</th><th></th></tr></thead>
+      <tbody id="customers-list-body">
+        <tr><td colspan="6" style="text-align:center;padding:32px 16px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0.45">
+            <i class="fa-solid fa-inbox" style="font-size:28px;color:var(--text-muted)"></i>
+            <div style="font-size:13px;color:var(--text-muted)">No customers yet</div>
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     CUSTOMER PROFILE PAGE
+═════════════════════════════════ -->
+<div class="page" id="page-customer-profile">
+  <button class="btn btn-outline btn-sm mb-4" onclick="navigate('customers',document.querySelector('[data-page=customers]'))"><i class="fa-solid fa-arrow-left"></i> Back to Customers</button>
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:18px;align-items:start">
+    <div class="card" id="profile-info-card">
+      <!-- filled by JS -->
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="card">
+        <div class="section-header"><div class="section-title">Vehicles</div><button class="btn btn-outline btn-sm" onclick="openAddVehicleForProfile()"><i class="fa-solid fa-plus"></i> Add Vehicle</button></div>
+        <div id="profile-vehicles-list" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+      <div class="card">
+        <div class="section-header"><div class="section-title">Visit & Service <span>History</span></div></div>
+        <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Type</th><th>Vehicle</th><th>Details</th><th>Amount</th></tr></thead>
+          <tbody id="profile-history-body">
+            <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No history yet</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="form-section-title"><i class="fa-solid fa-note-sticky"></i> Customer Notes</div>
+        <textarea class="form-textarea" id="profile-notes" placeholder="Preferences, complaints, special instructions..."></textarea>
+        <button class="btn btn-primary btn-sm mt-4" onclick="saveProfileNotes()"><i class="fa-solid fa-floppy-disk"></i> Save Notes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="page" id="page-registration">
+  <div class="card" style="max-width:760px;margin:0 auto">
+    <!-- Steps -->
+    <div class="wizard-steps">
+      <div class="wizard-step">
+        <div class="step-circle active" id="sc1">1</div>
+        <div class="step-info"><div class="step-num">STEP 1</div><div class="step-name">Customer</div></div>
+      </div>
+      <div class="step-line" id="sl1"></div>
+      <div class="wizard-step">
+        <div class="step-circle" id="sc2">2</div>
+        <div class="step-info"><div class="step-num">STEP 2</div><div class="step-name">Vehicle</div></div>
+      </div>
+      <div class="step-line" id="sl2"></div>
+      <div class="wizard-step">
+        <div class="step-circle" id="sc3">3</div>
+        <div class="step-info"><div class="step-num">STEP 3</div><div class="step-name">Tyre</div></div>
+      </div>
+      <div class="step-line" id="sl3"></div>
+      <div class="wizard-step">
+        <div class="step-circle" id="sc4">4</div>
+        <div class="step-info"><div class="step-num">STEP 4</div><div class="step-name">Fitment</div></div>
+      </div>
+    </div>
+
+    <!-- Step 1: Customer -->
+    <div class="wizard-page active" id="wp1">
+      <div class="form-section-title"><i class="fa-solid fa-user"></i> Customer Details</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Customer Name *</label><input class="form-input" type="text" id="reg-cust-name" placeholder="Enter full name"></div>
+        <div class="form-group"><label class="form-label">Mobile Number *</label><input class="form-input" type="tel" id="reg-cust-mobile" placeholder="+91 XXXXX XXXXX" oninput="checkExistingCustomer(this.value)"></div>
+        <div class="form-group"><label class="form-label">Alternate Number</label><input class="form-input" type="tel" id="reg-cust-alt" placeholder="+91 XXXXX XXXXX"></div>
+        <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" id="reg-cust-email" placeholder="email@example.com"></div>
+        <div class="form-group full"><label class="form-label">Address</label><input class="form-input" type="text" id="reg-cust-address" placeholder="Street, Area, Landmark"></div>
+        <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" id="reg-cust-city" placeholder="City"></div>
+      </div>
+      <div id="reg-existing-customer-note" style="display:none;font-size:12px;color:#4ADE80;margin-top:-8px;margin-bottom:16px"><i class="fa-solid fa-circle-check"></i> Existing customer found — their record will be updated with this new vehicle.</div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="wizardNext(1)"><i class="fa-solid fa-arrow-right"></i> Next: Vehicle Details</button>
+        <button class="btn btn-outline" onclick="navigate(isOwner()?'dashboard':'customers', document.querySelector(isOwner()?'[data-page=dashboard]':'[data-page=customers]'))">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Vehicle -->
+    <div class="wizard-page" id="wp2">
+      <div class="form-section-title"><i class="fa-solid fa-car"></i> Vehicle Details</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Registration Number *</label><input class="form-input" type="text" id="reg-veh-number" placeholder="MH12AB1234" style="text-transform:uppercase"></div>
+        <div class="form-group"><label class="form-label">Vehicle Brand *</label>
+          <select class="form-select" id="reg-veh-make"><option value="">Select Brand</option><option>Maruti Suzuki</option><option>Hyundai</option><option>Tata</option><option>Mahindra</option><option>Honda</option><option>Toyota</option><option>Ford</option><option>Volkswagen</option><option>BMW</option><option>Mercedes-Benz</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Vehicle Model</label><input class="form-input" type="text" id="reg-veh-model" placeholder="Swift, Creta, Nexon..."></div>
+        <div class="form-group"><label class="form-label">Vehicle Type *</label>
+          <select class="form-select" id="reg-veh-type"><option value="">Select Type</option><option>Hatchback</option><option>Sedan</option><option>SUV</option><option>Luxury</option><option>Commercial</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Fuel Type</label>
+          <select class="form-select" id="reg-veh-fuel"><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric</option><option>Hybrid</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Manufacturing Year</label><input class="form-input" type="number" id="reg-veh-year" placeholder="2020" min="1990" max="2025"></div>
+        <div class="form-group"><label class="form-label">Current Odometer (km)</label><input class="form-input" type="number" id="reg-veh-odo" placeholder="45000"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="wizardBack(2)"><i class="fa-solid fa-arrow-left"></i> Previous</button>
+        <button class="btn btn-primary" onclick="wizardNext(2)"><i class="fa-solid fa-arrow-right"></i> Next: Tyre Details</button>
+        <button class="btn btn-danger btn-sm" onclick="navigate('dashboard',document.querySelector('[onclick*=dashboard]'))">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Tyre -->
+    <div class="wizard-page" id="wp3">
+      <div class="form-section-title"><i class="fa-solid fa-tire"></i> Tyre Details</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Tyre Brand *</label>
+          <select class="form-select" id="reg-tyre-brand"><option value="">Select Brand</option><option>Yokohama</option><option>Bridgestone</option><option>Goodyear</option><option>JK Tyre</option><option>Apollo</option><option>Pirelli</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Tyre Size *</label><input class="form-input" type="text" id="reg-tyre-size" placeholder="195/65 R15"></div>
+        <div class="form-group"><label class="form-label">Quantity</label>
+          <select class="form-select" id="reg-tyre-qty" onchange="calcRegTotal()"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Tyre Position</label>
+          <select class="form-select" id="reg-tyre-position"><option>All Four</option><option>Front Left</option><option>Front Right</option><option>Rear Left</option><option>Rear Right</option><option>Spare</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Price Per Tyre (₹)</label><input class="form-input" type="number" placeholder="6500" id="reg-price-per" oninput="calcRegTotal()"></div>
+        <div class="form-group"><label class="form-label">Total Amount (₹)</label><input class="form-input" type="number" placeholder="26000" id="reg-total" readonly style="opacity:0.7"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="wizardBack(3)"><i class="fa-solid fa-arrow-left"></i> Previous</button>
+        <button class="btn btn-primary" onclick="wizardNext(3)"><i class="fa-solid fa-arrow-right"></i> Next: Fitment</button>
+        <button class="btn btn-danger btn-sm" onclick="navigate('dashboard',document.querySelector('[onclick*=dashboard]'))">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Fitment -->
+    <div class="wizard-page" id="wp4">
+      <div class="form-section-title"><i class="fa-solid fa-toolbox"></i> Fitment Details</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Fitment Date *</label><input class="form-input" type="date" id="reg-fitment-date"></div>
+        <div class="form-group"><label class="form-label">Technician Name</label><input class="form-input" type="text" id="reg-technician" placeholder="Technician name"></div>
+        <div class="form-group">
+          <label class="form-label">Wheel Alignment</label>
+          <div style="display:flex;gap:12px;margin-top:6px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="wa" value="yes" style="accent-color:var(--orange)"> Yes</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="wa" value="no" checked style="accent-color:var(--orange)"> No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Wheel Balancing</label>
+          <div style="display:flex;gap:12px;margin-top:6px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="wb" value="yes" style="accent-color:var(--orange)"> Yes</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="wb" value="no" checked style="accent-color:var(--orange)"> No</label>
+          </div>
+        </div>
+        <div class="form-group full"><label class="form-label">Additional Notes</label><textarea class="form-textarea" id="reg-fitment-notes" placeholder="Any special notes, observations, or instructions..."></textarea></div>
+      </div>
+      <div id="reg-save-error" style="display:none;background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.35);border-radius:8px;padding:12px 16px;font-size:12.5px;color:#F87171;line-height:1.5;margin-bottom:12px;word-break:break-word"></div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="wizardBack(4)"><i class="fa-solid fa-arrow-left"></i> Previous</button>
+        <button class="btn btn-primary" id="reg-save-btn" onclick="saveRegistration()"><i class="fa-solid fa-check"></i> Save Registration</button>
+        <button class="btn btn-danger btn-sm" onclick="navigate('dashboard',document.querySelector('[onclick*=dashboard]'))">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+<div class="page" id="page-reporting">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div>
+      <div class="section-header mb-4"><div class="section-title">Generate <span>Reports</span></div></div>
+      <div class="report-grid" style="grid-template-columns:1fr 1fr">
+        <div class="report-btn" onclick="showToast('Generating daily report...','info')"><i class="fa-solid fa-calendar-day"></i><div class="report-btn-title">Daily Report</div><div class="report-btn-sub">Today's activity</div></div>
+        <div class="report-btn" onclick="showToast('Generating weekly report...','info')"><i class="fa-solid fa-calendar-week"></i><div class="report-btn-title">Weekly Report</div><div class="report-btn-sub">Last 7 days</div></div>
+        <div class="report-btn" onclick="showToast('Generating monthly report...','info')"><i class="fa-solid fa-calendar"></i><div class="report-btn-title">Monthly Report</div><div class="report-btn-sub">This month</div></div>
+        <div class="report-btn" onclick="showToast('Generating brand-wise report...','info')"><i class="fa-solid fa-tags"></i><div class="report-btn-title">Brand Report</div><div class="report-btn-sub">By tyre brand</div></div>
+        <div class="report-btn" onclick="showToast('Generating sales report...','info')"><i class="fa-solid fa-chart-line"></i><div class="report-btn-title">Sales Report</div><div class="report-btn-sub">Revenue analysis</div></div>
+        <div class="report-btn" onclick="showToast('Generating customer report...','info')"><i class="fa-solid fa-users"></i><div class="report-btn-title">Customer Report</div><div class="report-btn-sub">Customer analysis</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-header mb-4"><div class="section-title">Export <span>Options</span></div></div>
+      <div class="card" style="margin-bottom:18px">
+        <div class="form-section-title" style="font-size:13px"><i class="fa-solid fa-sliders"></i> Report Configuration</div>
+        <div class="form-group mb-4"><label class="form-label">Date Range</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <input class="form-input" type="date" value="2025-06-01">
+            <input class="form-input" type="date" value="2025-06-09">
+          </div>
+        </div>
+        <div class="form-group mb-4"><label class="form-label">Report Type</label>
+          <select class="form-select"><option>All Reports</option><option>Sales Only</option><option>Customer Only</option><option>Brand-wise</option></select>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="showToast('PDF exported successfully!','success')"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+          <button class="btn btn-success btn-sm" onclick="showToast('Excel file downloaded!','success')"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+          <button class="btn btn-outline btn-sm" onclick="showToast('Sending to printer...','info')"><i class="fa-solid fa-print"></i> Print</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="form-section-title" style="font-size:13px"><i class="fa-solid fa-clock-rotate-left"></i> Recent Exports</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 16px;opacity:0.45">
+          <i class="fa-solid fa-file-circle-xmark" style="font-size:22px;color:var(--text-muted)"></i>
+          <div style="font-size:12px;color:var(--text-muted);text-align:center">No exports yet</div>
+          <div style="font-size:11px;color:var(--text-muted);text-align:center">Generated reports will appear here</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     NOTIFICATIONS PAGE
+═════════════════════════════════ -->
+<div class="page" id="page-notifications">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div>
+      <div class="section-header mb-4"><div class="section-title">Today's <span>Alerts</span></div><span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-muted)">0 new</span></div>
+      <div class="notif-list" id="notif-alerts-list">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 20px;background:rgba(255,255,255,0.02);border:1px solid var(--border-subtle);border-radius:var(--radius-sm)">
+          <i class="fa-solid fa-bell-slash" style="font-size:28px;color:var(--text-muted);opacity:0.4"></i>
+          <div style="font-size:13px;color:var(--text-muted);text-align:center">No alerts today</div>
+          <div style="font-size:11px;color:var(--text-muted);text-align:center">Alerts will appear here once customers and services are added</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-header mb-4"><div class="section-title">Pending <span>Follow-ups</span></div></div>
+      <div class="card">
+        <table class="data-table">
+          <thead><tr><th>Customer</th><th>Due Date</th><th>Type</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td colspan="4" style="text-align:center;padding:28px 16px;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.45">
+                <i class="fa-solid fa-clipboard-list" style="font-size:22px;color:var(--text-muted)"></i>
+                <div style="font-size:12px;color:var(--text-muted)">No pending follow-ups</div>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="section-header mt-6 mb-4"><div class="section-title">Feedback <span>Status</span></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="stat-card"><div class="stat-icon green"><i class="fa-solid fa-face-smile"></i></div><div class="stat-value" style="font-size:24px">0</div><div class="stat-label">5-Star Reviews</div></div>
+        <div class="stat-card"><div class="stat-icon orange"><i class="fa-solid fa-message"></i></div><div class="stat-value" style="font-size:24px">0</div><div class="stat-label">Pending Reviews</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     AUTOMATION PAGE
+═════════════════════════════════ -->
+<div class="page" id="page-automation">
+  <div class="section-header mb-6"><div class="section-title">Automation <span>Modules</span></div><span style="font-size:12px;color:var(--text-muted)">Configure smart customer communication</span></div>
+  <div class="automation-grid">
+    <!-- Next Day Follow-up -->
+    <div class="auto-card">
+      <div class="auto-card-header">
+        <div class="auto-card-icon" style="background:rgba(255,107,0,0.15);color:var(--orange)"><i class="fa-solid fa-calendar-plus"></i></div>
+        <div><div class="auto-card-title">Next Day Follow-up</div><div class="auto-card-sub">Auto-sent next morning after purchase</div></div>
+      </div>
+      <div class="auto-options">
+        <div class="settings-row" style="padding:10px 0">
+          <div class="settings-info"><div class="settings-name">Auto SMS</div><div class="settings-desc">Send thank-you SMS next day</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="settings-row" style="padding:10px 0">
+          <div class="settings-info"><div class="settings-name">WhatsApp Message</div><div class="settings-desc">Send via WhatsApp Business</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="margin-top:12px"><label class="form-label">Message Template</label><textarea class="form-textarea" style="margin-top:6px;font-size:12px" rows="3">Dear {name}, thank you for choosing Balaji Wheels! Your {brand} tyres are fitted on {vehicle}. For any assistance, call us.</textarea></div>
+      </div>
+    </div>
+    <!-- Feedback Collection -->
+    <div class="auto-card">
+      <div class="auto-card-header">
+        <div class="auto-card-icon" style="background:rgba(74,222,128,0.15);color:#4ADE80"><i class="fa-solid fa-star"></i></div>
+        <div><div class="auto-card-title">Feedback Collection</div><div class="auto-card-sub">Collect ratings and reviews</div></div>
+      </div>
+      <div class="auto-options">
+        <div class="settings-row" style="padding:10px 0">
+          <div class="settings-info"><div class="settings-name">Review Request</div><div class="settings-desc">Send Google review link after 3 days</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="settings-row" style="padding:10px 0">
+          <div class="settings-info"><div class="settings-name">Rating Collection</div><div class="settings-desc">1–5 star rating via SMS</div></div>
+          <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+        </div>
+        <div style="margin-top:12px"><label class="form-label">Timing</label>
+          <select class="form-select" style="margin-top:6px;font-size:12px"><option>3 days after purchase</option><option>7 days after purchase</option><option>14 days after purchase</option></select>
+        </div>
+      </div>
+    </div>
+    <!-- 2 Month Reminder -->
+    <div class="auto-card">
+      <div class="auto-card-header">
+        <div class="auto-card-icon" style="background:rgba(96,165,250,0.15);color:#60A5FA"><i class="fa-solid fa-rotate"></i></div>
+        <div><div class="auto-card-title">2-Month Service</div><div class="auto-card-sub">Tyre pressure & rotation check</div></div>
+      </div>
+      <div class="auto-options">
+        <div class="settings-row" style="padding:10px 0">
+          <div class="settings-info"><div class="settings-name">Auto Reminder</div><div class="settings-desc">SMS + WhatsApp reminder</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="margin-top:12px"><label class="form-label">Message Template</label><textarea class="form-textarea" style="margin-top:6px;font-size:12px" rows="3">Hi {name}, it's been 2 months since your tyre fitment. Time for a free pressure check at Balaji Wheels!</textarea></div>
+      </div>
+    </div>
+    <!-- 6 Month Reminder -->
+    <div class="auto-card">
+      <div class="auto-card-header">
+        <div class="auto-card-icon" style="background:rgba(192,132,252,0.15);color:#C084FC"><i class="fa-solid fa-calendar-check"></i></div>
+        <div><div class="auto-card-title">6-Month Service</div><div class="auto-card-sub">Full tyre inspection reminder</div></div>
+      </div>
+      <div class="auto-options">
+        <div class="settings-row" style="padding:10px 0">
+          <div class="settings-info"><div class="settings-name">Auto Reminder</div><div class="settings-desc">Comprehensive inspection prompt</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="margin-top:12px"><label class="form-label">Message Template</label><textarea class="form-textarea" style="margin-top:6px;font-size:12px" rows="3">Dear {name}, 6 months of safe driving! Visit Balaji Wheels for your complimentary tyre inspection on {vehicle}.</textarea></div>
+      </div>
+    </div>
+    <!-- Odometer Replacement -->
+    <div class="auto-card">
+      <div class="auto-card-header">
+        <div class="auto-card-icon" style="background:rgba(248,113,113,0.15);color:#F87171"><i class="fa-solid fa-gauge"></i></div>
+        <div><div class="auto-card-title">Odometer-based Alert</div><div class="auto-card-sub">Trigger at km threshold</div></div>
+      </div>
+      <div class="auto-options">
+        <div class="settings-row" style="padding:10px 0">
+          <div class="settings-info"><div class="settings-name">Replacement Alert</div><div class="settings-desc">Alert when nearing end-of-life</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="margin-top:12px"><label class="form-label">Alert at (km from purchase)</label><input class="form-input" style="margin-top:6px;font-size:12px" type="number" value="40000" placeholder="40000"></div>
+      </div>
+    </div>
+    <!-- Time-based Replacement -->
+    <div class="auto-card">
+      <div class="auto-card-header">
+        <div class="auto-card-icon" style="background:rgba(232,180,0,0.15);color:#E8B400"><i class="fa-solid fa-hourglass-half"></i></div>
+        <div><div class="auto-card-title">Time-based Replacement</div><div class="auto-card-sub">Annual tyre inspection trigger</div></div>
+      </div>
+      <div class="auto-options">
+        <div class="settings-row" style="padding:10px 0">
+          <div class="settings-info"><div class="settings-name">Annual Reminder</div><div class="settings-desc">Yearly replacement consideration</div></div>
+          <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+        </div>
+        <div style="margin-top:12px"><label class="form-label">Trigger After</label>
+          <select class="form-select" style="margin-top:6px;font-size:12px"><option>1 Year</option><option>2 Years</option><option>3 Years</option><option>5 Years</option></select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="form-actions mt-6">
+    <button class="btn btn-primary" onclick="showToast('Automation settings saved!','success')"><i class="fa-solid fa-floppy-disk"></i> Save All Settings</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     SETTINGS PAGE
+═════════════════════════════════ -->
+<div class="page" id="page-settings">
+  <!-- Firebase Rules Helper Banner -->
+  <div id="firebase-rules-banner" style="background:rgba(255,107,0,0.07);border:1px solid rgba(255,107,0,0.3);border-radius:12px;padding:18px 22px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <i class="fa-brands fa-google" style="color:var(--orange-light);font-size:16px"></i>
+      <span style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--orange-light)">Firebase Firestore Rules — Action Required</span>
+      <button onclick="document.getElementById('firebase-rules-banner').style.display='none'" style="margin-left:auto;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="font-size:12.5px;color:var(--text-secondary);line-height:1.7;margin-bottom:12px">
+      If vehicle / tyre data is not saving, your <strong style="color:#fff">Firestore Security Rules</strong> are blocking writes.<br>
+      Go to <a href="https://console.firebase.google.com/project/balaji-beea1/firestore/rules" target="_blank" style="color:var(--orange-light)">Firebase Console → Firestore → Rules</a> and paste the rules below, then click <strong style="color:#fff">Publish</strong>:
+    </div>
+    <pre style="background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px;font-size:12px;color:#a3e635;overflow-x:auto;line-height:1.6;user-select:all">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}</pre>
+    <div style="font-size:11.5px;color:var(--text-muted);margin-top:10px">⚠️ These rules allow any logged-in user to read/write. Suitable for your team setup.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <!-- Business Info -->
+    <div class="card">
+      <div class="form-section-title"><i class="fa-solid fa-building"></i> Business Information</div>
+      <div class="form-group mb-4"><label class="form-label">Business Name</label><input class="form-input" type="text" value="Balaji Wheels"></div>
+      <div class="form-group mb-4"><label class="form-label">Owner Name</label><input class="form-input" type="text" value="Balaji Enterprises"></div>
+      <div class="form-group mb-4"><label class="form-label">Phone</label><input class="form-input" type="tel" placeholder="+91 XXXXX XXXXX"></div>
+      <div class="form-group mb-4"><label class="form-label">GST Number</label><input class="form-input" type="text" placeholder="27XXXXX1234X1ZX"></div>
+      <div class="form-group mb-4"><label class="form-label">Address</label><textarea class="form-textarea" placeholder="Shop Address"></textarea></div>
+      <button class="btn btn-primary btn-sm" onclick="showToast('Business info updated!','success')"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <!-- Notification Settings -->
+      <div class="card">
+        <div class="form-section-title"><i class="fa-solid fa-bell"></i> Notification Settings</div>
+        <div class="settings-row"><div class="settings-info"><div class="settings-name">Email Notifications</div><div class="settings-desc">Receive daily summary via email</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+        <div class="settings-row"><div class="settings-info"><div class="settings-name">SMS Alerts</div><div class="settings-desc">Critical system alerts via SMS</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+        <div class="settings-row"><div class="settings-info"><div class="settings-name">Push Notifications</div><div class="settings-desc">Browser push notifications</div></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+      </div>
+      <!-- WhatsApp Integration -->
+      <div class="card">
+        <div class="form-section-title"><i class="fa-brands fa-whatsapp"></i> WhatsApp Integration</div>
+        <div class="form-group mb-4"><label class="form-label">API Key</label><input class="form-input" type="password" placeholder="Enter WhatsApp Business API Key"></div>
+        <div class="form-group mb-4"><label class="form-label">Phone Number ID</label><input class="form-input" type="text" placeholder="Enter Phone Number ID"></div>
+        <button class="btn btn-success btn-sm" onclick="showToast('WhatsApp connected!','success')"><i class="fa-brands fa-whatsapp"></i> Test Connection</button>
+      </div>
+      <!-- Theme -->
+      <div class="card">
+        <div class="form-section-title"><i class="fa-solid fa-palette"></i> Theme Settings</div>
+        <div class="form-group mb-4"><label class="form-label">Accent Color</label>
+          <div style="display:flex;gap:10px;margin-top:6px">
+            <div onclick="changeAccent('#FF6B00')" style="width:28px;height:28px;border-radius:50%;background:#FF6B00;cursor:pointer;border:2px solid #fff"></div>
+            <div onclick="changeAccent('#3B82F6')" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;cursor:pointer"></div>
+            <div onclick="changeAccent('#10B981')" style="width:28px;height:28px;border-radius:50%;background:#10B981;cursor:pointer"></div>
+            <div onclick="changeAccent('#8B5CF6')" style="width:28px;height:28px;border-radius:50%;background:#8B5CF6;cursor:pointer"></div>
+            <div onclick="changeAccent('#EF4444')" style="width:28px;height:28px;border-radius:50%;background:#EF4444;cursor:pointer"></div>
+          </div>
+        </div>
+        <div class="settings-row"><div class="settings-info"><div class="settings-name">Compact Mode</div><div class="settings-desc">Reduce padding for more data density</div></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ════════════════════════════════
+     USER MANAGEMENT PAGE (Owner only)
+═════════════════════════════════ -->
+<div class="page" id="page-user-management">
+  <div style="max-width:860px;margin:0 auto">
+    <div class="card" style="margin-bottom:20px">
+      <div class="section-header" style="margin-bottom:18px">
+        <div class="section-title">User <span>Management</span></div>
+        <button class="btn btn-primary btn-sm" onclick="openAddUserModal()"><i class="fa-solid fa-user-plus"></i> Add User</button>
+      </div>
+      <div style="background:rgba(255,107,0,0.06);border:1px solid rgba(255,107,0,0.2);border-radius:10px;padding:13px 16px;font-size:12.5px;color:var(--text-secondary);line-height:1.6">
+        <i class="fa-solid fa-shield-halved" style="color:var(--orange);margin-right:6px"></i>
+        Click <strong style="color:var(--orange-light)">Manage Access</strong> on any manager to toggle which pages they can see. Changes apply on their next page navigation or login.
+      </div>
+    </div>
+
+    <div id="user-list-body">
+      <div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px"><span class="spinner"></span> Loading users...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div id="add-user-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center">
+  <div class="card" style="width:100%;max-width:420px;margin:20px">
+    <div class="form-section-title" style="margin-bottom:18px"><i class="fa-solid fa-user-plus"></i> Create Manager Account</div>
+    <div id="add-user-error" class="login-error"></div>
+    <div class="form-group mb-4"><label class="form-label">Display Name</label><input class="form-input" type="text" id="new-user-name" placeholder="Staff member name"></div>
+    <div class="form-group mb-4"><label class="form-label">Email Address</label><input class="form-input" type="email" id="new-user-email" placeholder="manager@balajiwheels.com"></div>
+    <div class="form-group mb-4"><label class="form-label">Password</label><input class="form-input" type="password" id="new-user-password" placeholder="Min 6 characters"></div>
+    <div class="form-group mb-4">
+      <label class="form-label">Role</label>
+      <select class="form-select" id="new-user-role">
+        <option value="manager" selected>Manager</option>
+        <option value="owner">Owner</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="add-user-btn" onclick="createManagerAccount()"><i class="fa-solid fa-user-plus"></i> Create Account</button>
+      <button class="btn btn-outline" onclick="closeAddUserModal()">Cancel</button>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:12px;line-height:1.5"><i class="fa-solid fa-circle-info" style="color:var(--orange)"></i> This creates a Firebase Authentication account and stores the role in Realtime Database at <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px">/users/{uid}/role</code>.</div>
+  </div>
+</div>
+
+<!-- RBAC ACCESS DENIED OVERLAY -->
+<div id="access-denied-overlay">
+  <div class="denied-icon"><i class="fa-solid fa-ban"></i></div>
+  <div class="denied-title">Access Denied</div>
+  <div class="denied-sub">The Dashboard is restricted to <strong>Owners</strong> only. Managers have full access to all other features.</div>
+  <div class="denied-redirect" id="denied-countdown">Redirecting in 3 seconds...</div>
+  <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="dismissAccessDenied()"><i class="fa-solid fa-arrow-left"></i> Go Back</button>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+</div><!-- /#app-root -->
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
+  createUserWithEmailAndPassword, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs,
+  updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot,
+  serverTimestamp, increment, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {
+  getDatabase, ref as dbRef, set as dbSet, get as dbGet, remove as dbRemove, onValue
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// ════════════════════════════════════════════════════════════
+// FIREBASE CONFIG — replace with your project's keys
+// Firebase Console → Project Settings → General → Your apps → SDK setup
+// ════════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyC00hCeF1nFQfQSid8mlHkYQ2SaFw9HcEA",
+  authDomain: "balaji-beea1.firebaseapp.com",
+  projectId: "balaji-beea1",
+  storageBucket: "balaji-beea1.firebasestorage.app",
+  messagingSenderId: "936146222976",
+  appId: "1:936146222976:web:3031d088a7c18797f70b65",
+  measurementId: "G-YP1S7XGTDF",
+  databaseURL: "https://balaji-beea1-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+
+const isConfigured = !Object.values(firebaseConfig).some(v => String(v).startsWith('YOUR_'));
+
+let app, auth, db, storage, rtdb;
+if (isConfigured) {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+  rtdb = getDatabase(app);
+} else {
+  document.addEventListener('DOMContentLoaded', () => {
+    const w = document.getElementById('fb-config-warning');
+    if (w) w.style.display = 'block';
+  });
+  const w = document.getElementById('fb-config-warning');
+  if (w) w.style.display = 'block';
+}
+
+// ── RBAC helpers (exposed on window.__fb) ──
+async function getUserRole(uid) {
+  if (!rtdb) return 'manager'; // default safe fallback
+  try {
+    const snap = await dbGet(dbRef(rtdb, `users/${uid}/role`));
+    return snap.exists() ? snap.val() : 'manager'; // default = manager
+  } catch(e) { return 'manager'; }
+}
+async function setUserRole(uid, role) {
+  if (!rtdb) return;
+  await dbSet(dbRef(rtdb, `users/${uid}/role`), role);
+}
+async function setUserProfile(uid, profile) {
+  if (!rtdb) return;
+  await dbSet(dbRef(rtdb, `users/${uid}`), profile);
+}
+async function getAllManagedUsers() {
+  if (!rtdb) return [];
+  const snap = await dbGet(dbRef(rtdb, 'users'));
+  if (!snap.exists()) return [];
+  const result = [];
+  snap.forEach(child => { result.push({ uid: child.key, ...child.val() }); });
+  return result;
+}
+
+// Expose to the non-module script below via window
+window.__fb = {
+  isConfigured, app, auth, db, storage, rtdb,
+  signInWithEmailAndPassword, onAuthStateChanged, signOut,
+  createUserWithEmailAndPassword, updateProfile,
+  collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc, deleteDoc,
+  query, where, orderBy, limit, onSnapshot, serverTimestamp, increment, Timestamp,
+  ref, uploadBytes, getDownloadURL,
+  // RBAC
+  getUserRole, setUserRole, setUserProfile, getAllManagedUsers,
+  dbRef, dbSet, dbGet, dbRemove, onValue, rtdb
+};
+window.dispatchEvent(new Event('fb-ready'));
+</script>
+
+<script>
+// ── ANIMATED CANVAS BACKGROUND ──────────────────────────────────
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+const tyres = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Tyre {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.r = 25 + Math.random() * 55;
+    this.speed = 0.2 + Math.random() * 0.5;
+    this.angle = 0;
+    this.opacity = 0.03 + Math.random() * 0.07;
+    this.dx = (Math.random() - 0.5) * 0.4;
+    this.dy = (Math.random() - 0.5) * 0.4;
+  }
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.globalAlpha = this.opacity;
+    // Outer ring
+    ctx.beginPath();
+    ctx.arc(0, 0, this.r, 0, Math.PI * 2);
+    ctx.strokeStyle = '#FF6B00';
+    ctx.lineWidth = this.r * 0.18;
+    ctx.stroke();
+    // Inner ring
+    ctx.beginPath();
+    ctx.arc(0, 0, this.r * 0.55, 0, Math.PI * 2);
+    ctx.strokeStyle = '#C0C0C0';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Spokes
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a) * this.r * 0.55, Math.sin(a) * this.r * 0.55);
+      ctx.lineTo(Math.cos(a) * this.r * 0.85, Math.sin(a) * this.r * 0.85);
+      ctx.strokeStyle = '#FF6B00';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  update() {
+    this.angle += this.speed * 0.01;
+    this.x += this.dx;
+    this.y += this.dy;
+    if (this.x < -this.r) this.x = W + this.r;
+    if (this.x > W + this.r) this.x = -this.r;
+    if (this.y < -this.r) this.y = H + this.r;
+    if (this.y > H + this.r) this.y = -this.r;
+  }
+}
+
+for (let i = 0; i < 18; i++) tyres.push(new Tyre());
+
+function animateBg() {
+  ctx.clearRect(0, 0, W, H);
+  tyres.forEach(t => { t.update(); t.draw(); });
+  requestAnimationFrame(animateBg);
+}
+animateBg();
+
+// ── SIDEBAR TOGGLE ───────────────────────────────────────────────
+let sidebarCollapsed = false;
+function toggleSidebar() {
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('sidebar-overlay').classList.toggle('active');
+  } else {
+    sidebarCollapsed = !sidebarCollapsed;
+    document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+    document.getElementById('topbar').classList.toggle('collapsed', sidebarCollapsed);
+    document.getElementById('main').classList.toggle('collapsed', sidebarCollapsed);
+  }
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────────
+const pageTitles = {
+  dashboard: 'Dashboard',
+  customers: 'Customers',
+  'customer-profile': 'Customer Profile',
+  registration: 'New Registration',
+  reporting: 'Reporting',
+  notifications: 'Notifications',
+  automation: 'Automation',
+  settings: 'Settings',
+  'user-management': 'User Management'
+};
+
+function navigate(page, navEl) {
+  // ── RBAC ROUTE GUARD ──
+  // Only enforce if a user is logged in (role is set)
+  if (window.__currentRole && !canAccessPage(page)) {
+    showAccessDenied();
+    return;
+  }
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[page] || page;
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('sidebar-overlay').classList.remove('active');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (page === 'customers') renderCustomersList();
+  if (page === 'registration') resetRegistrationForm();
+  if (page === 'dashboard') refreshDashboard();
+  if (page === 'user-management') renderUserManagementList();
+}
+
+// ── COUNTER ANIMATION ────────────────────────────────────────────
+// All counters start at zero — no demo data
+function animateCounters() {
+  // Stats are already 0; nothing to animate until real data is entered
+}
+
+// ── SHARED BRAND COLOR MAP ──────────────────────────────────────
+const brandList = [
+  {name:'Apollo',      color:'#FF6B00'},
+  {name:'Yokohama',    color:'#E8B400'},
+  {name:'Bridgestone', color:'#E53E3E'},
+  {name:'Goodyear',    color:'#38A169'},
+  {name:'JK Tyre',     color:'#3182CE'},
+  {name:'Pirelli',     color:'#805AD5'},
+];
+
+// ── WIZARD ───────────────────────────────────────────────────────
+function wizardNext(step) {
+  document.getElementById('wp'+step).classList.remove('active');
+  document.getElementById('wp'+(step+1)).classList.add('active');
+  document.getElementById('sc'+step).classList.remove('active');
+  document.getElementById('sc'+step).classList.add('done');
+  document.getElementById('sc'+step).innerHTML = '<i class="fa-solid fa-check" style="font-size:12px"></i>';
+  document.getElementById('sl'+step).classList.add('done');
+  document.getElementById('sc'+(step+1)).classList.add('active');
+}
+function wizardBack(step) {
+  document.getElementById('wp'+step).classList.remove('active');
+  document.getElementById('wp'+(step-1)).classList.add('active');
+  document.getElementById('sc'+step).classList.remove('active');
+  document.getElementById('sc'+(step-1)).classList.remove('done');
+  document.getElementById('sc'+(step-1)).textContent = step-1;
+  document.getElementById('sc'+(step-1)).classList.add('active');
+  document.getElementById('sl'+(step-1)).classList.remove('done');
+}
+function calcRegTotal() {
+  const price = parseFloat(document.getElementById('reg-price-per')?.value) || 0;
+  const qty = parseFloat(document.getElementById('reg-tyre-qty')?.value) || 4;
+  const total = document.getElementById('reg-total');
+  if (total) total.value = price * qty;
+}
+function resetRegistrationForm() {
+  document.querySelectorAll('#page-registration input, #page-registration select, #page-registration textarea').forEach(el => {
+    if (el.type === 'radio') { el.checked = (el.value === 'no'); return; }
+    if (el.tagName === 'SELECT') { el.selectedIndex = 0; return; }
+    el.value = '';
+  });
+  document.getElementById('reg-existing-customer-note').style.display = 'none';
+  window.__regExistingCustomerId = null;
+  document.querySelectorAll('.wizard-page').forEach((p,i) => { p.classList.toggle('active', i===0); });
+  ['sc1','sc2','sc3','sc4'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.className = 'step-circle' + (i===0?' active':'');
+    el.textContent = i+1;
+  });
+  ['sl1','sl2','sl3'].forEach(id => document.getElementById(id).classList.remove('done'));
+}
+async function checkExistingCustomer(mobile) {
+  mobile = (mobile || '').trim();
+  const note = document.getElementById('reg-existing-customer-note');
+  window.__regExistingCustomerId = null;
+  if (mobile.length < 10 || !window.__fb?.isConfigured) { note.style.display = 'none'; return; }
+  const existing = await dataFindCustomerByMobile(mobile);
+  if (existing) {
+    window.__regExistingCustomerId = existing.id;
+    document.getElementById('reg-cust-name').value = existing.name || '';
+    document.getElementById('reg-cust-alt').value = existing.altMobile || '';
+    document.getElementById('reg-cust-email').value = existing.email || '';
+    document.getElementById('reg-cust-address').value = existing.address || '';
+    document.getElementById('reg-cust-city').value = existing.city || '';
+    note.style.display = 'block';
+  } else {
+    note.style.display = 'none';
+  }
+}
+async function saveRegistration() {
+  const name = document.getElementById('reg-cust-name').value.trim();
+  const mobile = document.getElementById('reg-cust-mobile').value.trim();
+  const vehNumber = document.getElementById('reg-veh-number').value.trim().toUpperCase();
+  if (!name || !mobile) { showToast('Customer name and mobile are required','error'); return; }
+  if (!vehNumber) { showToast('Vehicle registration number is required','error'); return; }
+  if (!window.__fb?.isConfigured) { showToast('Firebase not configured — check setup','error'); return; }
+
+  // Hide any previous error banner
+  const errBanner = document.getElementById('reg-save-error');
+  if (errBanner) errBanner.style.display = 'none';
+
+  const btn = document.getElementById('reg-save-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+  try {
+    // ── Step 1: Save / update customer ──
+    const customer = {
+      name, mobile,
+      altMobile: document.getElementById('reg-cust-alt').value.trim(),
+      email: document.getElementById('reg-cust-email').value.trim(),
+      address: document.getElementById('reg-cust-address').value.trim(),
+      city: document.getElementById('reg-cust-city').value.trim(),
+    };
+    let customerId;
+    try {
+      customerId = await dataUpsertCustomer(customer, window.__regExistingCustomerId);
+    } catch(e) {
+      throw new Error('Could not save customer: ' + (e.code === 'permission-denied' ? 'Firebase permission denied — check Firestore rules' : e.message));
+    }
+
+    // ── Step 2: Save / update vehicle ──
+    const vehicleType = document.getElementById('reg-veh-type').value;
+    const vehicle = {
+      customerId,
+      regNumber: vehNumber,
+      make: document.getElementById('reg-veh-make').value,
+      model: document.getElementById('reg-veh-model').value.trim(),
+      vehicleType,
+      fuelType: document.getElementById('reg-veh-fuel').value,
+      year: document.getElementById('reg-veh-year').value,
+      odometer: parseFloat(document.getElementById('reg-veh-odo').value) || 0,
+    };
+    let vehicleId;
+    try {
+      vehicleId = await dataUpsertVehicle(vehicle);
+    } catch(e) {
+      throw new Error('Could not save vehicle: ' + (e.code === 'permission-denied' ? 'Firebase permission denied — check Firestore rules' : e.message));
+    }
+
+    // ── Step 3: Save sale record ──
+    const qty = parseInt(document.getElementById('reg-tyre-qty').value) || 0;
+    const pricePer = parseFloat(document.getElementById('reg-price-per').value) || 0;
+    const sale = {
+      customerId, vehicleId,
+      customerName: name, mobile, vehicleNumber: vehNumber, vehicleType,
+      brand: document.getElementById('reg-tyre-brand').value || '',
+      size: document.getElementById('reg-tyre-size').value.trim() || '',
+      quantity: qty,
+      position: document.getElementById('reg-tyre-position').value || '',
+      pricePerUnit: pricePer,
+      total: qty * pricePer,
+      isFitmentOnly: qty === 0 && pricePer === 0,
+      fitmentDate: document.getElementById('reg-fitment-date').value || new Date().toISOString().slice(0,10),
+      technician: document.getElementById('reg-technician').value.trim() || '',
+      wheelAlignment: document.querySelector('input[name="wa"]:checked')?.value === 'yes',
+      wheelBalancing: document.querySelector('input[name="wb"]:checked')?.value === 'yes',
+      notes: document.getElementById('reg-fitment-notes').value.trim() || '',
+    };
+    try {
+      await dataAddSale(sale);
+    } catch(e) {
+      throw new Error('Could not save sale record: ' + (e.code === 'permission-denied' ? 'Firebase permission denied — check Firestore rules' : e.message));
+    }
+
+    showToast('Registration saved successfully! 🎉','success');
+    const destPage = isOwner() ? 'dashboard' : 'customers';
+    setTimeout(() => navigate(destPage, document.querySelector(`[data-page="${destPage}"]`)), 1200);
+
+  } catch (e) {
+    console.error('saveRegistration error:', e);
+    // Show a persistent error banner so it doesn't disappear
+    const banner = document.getElementById('reg-save-error');
+    if (banner) {
+      banner.textContent = '⚠️ ' + (e.message || 'Unknown error. Check browser console (F12) for details.');
+      banner.style.display = 'block';
+    } else {
+      // fallback — long toast
+      showToast(e.message || 'Save failed — open F12 console for details', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Save Registration';
+  }
+}
+
+
+
+
+
+
+
+// ── TOAST ────────────────────────────────────────────────────────
+function showToast(msg, type='info') {
+  const icons = { success:'fa-circle-check', error:'fa-circle-xmark', info:'fa-circle-info' };
+  const tc = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fa-solid ${icons[type]}"></i><span>${msg}</span>`;
+  tc.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(30px)'; t.style.transition='all 0.3s'; setTimeout(()=>t.remove(),300); }, 3000);
+}
+
+// ── THEME ACCENT ──────────────────────────────────────────────────
+function changeAccent(color) {
+  document.documentElement.style.setProperty('--orange', color);
+  const r = parseInt(color.slice(1,3),16), g=parseInt(color.slice(3,5),16), b=parseInt(color.slice(5,7),16);
+  document.documentElement.style.setProperty('--orange-glow', `rgba(${r},${g},${b},0.25)`);
+  document.documentElement.style.setProperty('--border', `rgba(${r},${g},${b},0.18)`);
+  showToast('Theme accent updated!','success');
+}
+
+// ════════════════════════════════════════════════════════════════
+// FIREBASE-BACKED DATA LAYER
+// ════════════════════════════════════════════════════════════════
+let fb = null; // populated once firebase module script fires fb-ready
+window.addEventListener('fb-ready', () => {
+  fb = window.__fb;
+  initAuthListener();
+});
+// In case the event already fired before this script ran:
+if (window.__fb) { fb = window.__fb; initAuthListener(); }
+
+function initAuthListener() {
+  if (!fb.isConfigured) {
+    return;
+  }
+  fb.onAuthStateChanged(fb.auth, async (user) => {
+    if (user) {
+      const OWNER_EMAILS = ['chinmay@gmail.com'];
+      const email = (user.email || '').toLowerCase();
+
+      let role = await fb.getUserRole(user.uid);
+
+      // ── Owner whitelist: always enforce owner role ──
+      if (OWNER_EMAILS.includes(email)) {
+        if (role !== 'owner') {
+          await fb.setUserProfile(user.uid, {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || 'Chinmay',
+            role: 'owner',
+            createdAt: new Date().toISOString(),
+            seededBy: 'system'
+          });
+          role = 'owner';
+        }
+        window.__currentAllowedPages = null; // owners have no restrictions
+      } else {
+        // ── Non-owner: seed their real-UID record if missing, merging any email-keyed record ──
+        const snap = await fb.dbGet(fb.dbRef(fb.rtdb, `users/${user.uid}`));
+        if (!snap.exists()) {
+          // Check if there's an email-keyed placeholder record from the owner seeding
+          const emailKey = email.replace(/[@.]/g, '_');
+          const emailSnap = await fb.dbGet(fb.dbRef(fb.rtdb, `users/${emailKey}`));
+          const existing = emailSnap.exists() ? emailSnap.val() : {};
+          // Write under the real UID
+          await fb.dbSet(fb.dbRef(fb.rtdb, `users/${user.uid}`), {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || existing.displayName || email,
+            role: existing.role || role || 'manager',
+            allowedPages: existing.allowedPages || ALL_MANAGER_PAGES_DEFAULT,
+            createdAt: existing.createdAt || new Date().toISOString(),
+            seededBy: 'login'
+          });
+          // Remove stale email-keyed record if it existed
+          if (emailSnap.exists()) {
+            await fb.dbRemove(fb.dbRef(fb.rtdb, `users/${emailKey}`));
+          }
+          role = existing.role || role || 'manager';
+          window.__currentAllowedPages = existing.allowedPages || ALL_MANAGER_PAGES_DEFAULT;
+        } else {
+          const data = snap.val();
+          role = data.role || 'manager';
+          window.__currentAllowedPages = Array.isArray(data.allowedPages)
+            ? data.allowedPages
+            : ALL_MANAGER_PAGES_DEFAULT;
+        }
+      }
+
+      window.__currentUser = user;
+      window.__currentRole = role;
+
+      applyRBACToUI(user, role);
+
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app-root').classList.add('ready');
+
+      if (role === 'owner') {
+        navigate('dashboard', document.getElementById('nav-dashboard'));
+        refreshDashboard();
+      } else {
+        const firstAllowed = (window.__currentAllowedPages || ALL_MANAGER_PAGES_DEFAULT)[0] || 'customers';
+        navigate(firstAllowed, document.querySelector(`[data-page="${firstAllowed}"]`));
+      }
+    } else {
+      window.__currentUser = null;
+      window.__currentRole = null;
+      window.__currentAllowedPages = null;
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('app-root').classList.remove('ready');
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// RBAC CORE ENGINE
+// ════════════════════════════════════════════════════════════════
+
+// Default pages a manager can access (all except dashboard)
+const ALL_MANAGER_PAGES_DEFAULT = ['customers', 'customer-profile', 'registration', 'reporting', 'notifications', 'automation', 'settings'];
+
+// Static permission matrix — owners always have full access
+const ROLE_PERMISSIONS = {
+  owner: {
+    pages: ['dashboard', 'customers', 'customer-profile', 'registration', 'reporting', 'notifications', 'automation', 'settings', 'user-management'],
+    canManageUsers: true,
+    canViewDashboard: true,
+  },
+  manager: {
+    // Pages for managers come from their RTDB allowedPages record, not this static list
+    pages: ALL_MANAGER_PAGES_DEFAULT,
+    canManageUsers: false,
+    canViewDashboard: false,
+  }
+};
+
+function isOwner() {
+  return window.__currentRole === 'owner';
+}
+function isManager() {
+  return window.__currentRole === 'manager';
+}
+function canAccessPage(page) {
+  const role = window.__currentRole || 'manager';
+  if (role === 'owner') {
+    return ROLE_PERMISSIONS.owner.pages.includes(page);
+  }
+  // Dashboard is ALWAYS blocked for managers regardless of allowedPages
+  if (page === 'dashboard' || page === 'user-management') return false;
+  // customer-profile is allowed if customers is allowed
+  if (page === 'customer-profile') {
+    const allowed = window.__currentAllowedPages || ALL_MANAGER_PAGES_DEFAULT;
+    return allowed.includes('customers');
+  }
+  // Use live allowedPages from Firebase (loaded at login)
+  const allowed = window.__currentAllowedPages || ALL_MANAGER_PAGES_DEFAULT;
+  return allowed.includes(page);
+}
+
+function applyRBACToUI(user, role) {
+  // Update sidebar footer
+  const initials = (user.displayName || user.email || 'U').slice(0, 2).toUpperCase();
+  const avatarEl = document.getElementById('sidebar-avatar');
+  const nameEl   = document.getElementById('sidebar-user-name');
+  const roleEl   = document.getElementById('sidebar-user-role');
+  if (avatarEl) avatarEl.textContent = initials;
+  if (nameEl)   nameEl.textContent = user.displayName || user.email;
+  if (roleEl) {
+    const label = role === 'owner' ? 'Owner' : 'Manager';
+    roleEl.innerHTML = `<span class="role-badge ${role}">${role === 'owner' ? '<i class="fa-solid fa-crown"></i>' : '<i class="fa-solid fa-briefcase"></i>'} ${label}</span>`;
+  }
+
+  // Show/hide owner-only nav items (dashboard, user-management)
+  document.querySelectorAll('.nav-item.owner-only').forEach(el => {
+    el.classList.toggle('hidden-for-role', role !== 'owner');
+  });
+
+  // For managers: also hide nav items for pages not in their allowedPages
+  if (role !== 'owner') {
+    const allowed = window.__currentAllowedPages || ALL_MANAGER_PAGES_DEFAULT;
+    document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+      const page = el.dataset.page;
+      if (!page || el.classList.contains('owner-only')) return;
+      el.classList.toggle('hidden-for-role', !allowed.includes(page));
+    });
+  }
+}
+
+// ── ROUTE GUARD ─────────────────────────────────────────────────
+let __deniedTimer = null;
+
+function guardNavigation(page) {
+  if (!canAccessPage(page)) {
+    showAccessDenied();
+    return false;
+  }
+  return true;
+}
+
+function showAccessDenied() {
+  const overlay = document.getElementById('access-denied-overlay');
+  overlay.classList.add('show');
+  let countdown = 3;
+  const countEl = document.getElementById('denied-countdown');
+  if (countEl) countEl.textContent = `Redirecting in ${countdown} seconds...`;
+  clearInterval(__deniedTimer);
+  __deniedTimer = setInterval(() => {
+    countdown--;
+    if (countEl) countEl.textContent = `Redirecting in ${countdown} seconds...`;
+    if (countdown <= 0) {
+      clearInterval(__deniedTimer);
+      dismissAccessDenied();
+    }
+  }, 1000);
+}
+
+function dismissAccessDenied() {
+  clearInterval(__deniedTimer);
+  document.getElementById('access-denied-overlay').classList.remove('show');
+  // Redirect to the first allowed page for the current role
+  const role = window.__currentRole || 'manager';
+  const defaultPage = ROLE_PERMISSIONS[role]?.pages[0] || 'customers';
+  const navEl = document.querySelector(`[data-page="${defaultPage}"]`);
+  navigate(defaultPage, navEl);
+}
+
+// ════════════════════════════════════════════════════════════════
+// USER MANAGEMENT (Owner only)
+// ════════════════════════════════════════════════════════════════
+
+function openAddUserModal() {
+  if (!isOwner()) { showToast('Only the Owner can manage users.', 'error'); return; }
+  document.getElementById('add-user-modal').style.display = 'flex';
+  document.getElementById('add-user-error').classList.remove('show');
+  document.getElementById('new-user-name').value = '';
+  document.getElementById('new-user-email').value = '';
+  document.getElementById('new-user-password').value = '';
+  document.getElementById('new-user-role').value = 'manager';
+}
+
+function closeAddUserModal() {
+  document.getElementById('add-user-modal').style.display = 'none';
+}
+
+async function createManagerAccount() {
+  if (!isOwner()) { showToast('Access denied.', 'error'); return; }
+  const name = document.getElementById('new-user-name').value.trim();
+  const email = document.getElementById('new-user-email').value.trim();
+  const password = document.getElementById('new-user-password').value;
+  const role = document.getElementById('new-user-role').value;
+  const errEl = document.getElementById('add-user-error');
+  errEl.classList.remove('show');
+
+  if (!name || !email || !password) {
+    errEl.textContent = 'All fields are required.';
+    errEl.classList.add('show'); return;
+  }
+  if (password.length < 6) {
+    errEl.textContent = 'Password must be at least 6 characters.';
+    errEl.classList.add('show'); return;
+  }
+
+  const btn = document.getElementById('add-user-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Creating...';
+
+  // We use a secondary app instance to create user without signing out the owner.
+  // Firebase doesn't let you create users without signing in as them unless you use Admin SDK.
+  // The cleanest client-side workaround: use createUserWithEmailAndPassword on a secondary auth
+  // instance, then immediately restore the owner session.
+  try {
+    const { initializeApp: initApp2 } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const { getAuth: getAuth2, createUserWithEmailAndPassword: createUser2, updateProfile: updateProfile2 } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+
+    const secondaryApp = initApp2(fb.app.options, 'secondary-' + Date.now());
+    const secondaryAuth = getAuth2(secondaryApp);
+
+    const cred = await createUser2(secondaryAuth, email, password);
+    await updateProfile2(cred.user, { displayName: name });
+
+    // Store role + profile in Realtime Database
+    await fb.setUserProfile(cred.user.uid, {
+      uid: cred.user.uid,
+      email,
+      displayName: name,
+      role,
+      createdAt: new Date().toISOString(),
+      createdBy: window.__currentUser?.uid || 'owner'
+    });
+
+    // Sign out the secondary instance
+    await secondaryAuth.signOut();
+    await secondaryApp.delete?.();
+
+    showToast(`${role === 'owner' ? 'Owner' : 'Manager'} account created for ${name}!`, 'success');
+    closeAddUserModal();
+    renderUserManagementList();
+  } catch(e) {
+    errEl.textContent = 'Failed to create account: ' + (e.message || 'Unknown error');
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account';
+  }
+}
+
+async function renderUserManagementList() {
+  if (!isOwner() || !fb?.isConfigured) return;
+  const body = document.getElementById('user-list-body');
+  if (!body) return;
+  body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)"><span class="spinner"></span></div>';
+
+  try {
+    await ensureKnownUsersSeeded();
+    let users = await fb.getAllManagedUsers();
+
+    // Always show the current owner (Chinmay) at top even before RTDB seeded
+    const currentEmail = (window.__currentUser?.email || '').toLowerCase();
+    const alreadyListed = users.some(u => (u.email||'').toLowerCase() === currentEmail);
+    if (!alreadyListed) {
+      users = [{
+        uid: window.__currentUser?.uid,
+        email: window.__currentUser?.email,
+        displayName: window.__currentUser?.displayName || 'Chinmay',
+        role: 'owner'
+      }, ...users];
+    }
+
+    // Sort: owners first
+    users.sort((a, b) => {
+      if (a.role === 'owner' && b.role !== 'owner') return -1;
+      if (b.role === 'owner' && a.role !== 'owner') return 1;
+      return (a.displayName||'').localeCompare(b.displayName||'');
+    });
+
+    if (!users.length) {
+      body.innerHTML = '<div style="text-align:center;padding:40px;font-size:13px;color:var(--text-muted)">No users found.</div>';
+      return;
+    }
+    body.innerHTML = users.map(u => buildUserCard(u, currentEmail)).join('');
+  } catch(e) {
+    body.innerHTML = `<div style="text-align:center;padding:40px;font-size:13px;color:#F87171"><i class="fa-solid fa-circle-exclamation"></i> Failed to load users: ${escapeHtml(e.message)}</div>`;
+  }
+}
+
+// ── All toggleable pages for managers ──
+const ALL_MANAGER_PAGES = [
+  { key: 'customers',     label: 'Customers',     icon: 'fa-address-book' },
+  { key: 'registration',  label: 'Registration',  icon: 'fa-user-plus' },
+  { key: 'reporting',     label: 'Reporting',     icon: 'fa-chart-bar' },
+  { key: 'notifications', label: 'Notifications', icon: 'fa-bell' },
+  { key: 'automation',    label: 'Automation',    icon: 'fa-robot' },
+  { key: 'settings',      label: 'Settings',      icon: 'fa-gear' },
+];
+const KNOWN_USERS = [
+  { email: 'neesha0705patil@gmail.com', displayName: 'Neesha Patil', role: 'manager' }
+];
+
+async function ensureKnownUsersSeeded() {
+  if (!fb?.isConfigured) return;
+  const all = await fb.getAllManagedUsers();
+  for (const ku of KNOWN_USERS) {
+    // Check if any existing record (under any key) already has this email
+    const exists = all.some(u => (u.email || '').toLowerCase() === ku.email.toLowerCase());
+    if (!exists) {
+      const key = ku.email.replace(/[@.]/g, '_');
+      await fb.dbSet(fb.dbRef(fb.rtdb, `users/${key}`), {
+        email: ku.email,
+        displayName: ku.displayName,
+        role: ku.role,
+        createdAt: new Date().toISOString(),
+        seededBy: 'owner-whitelist',
+        allowedPages: ALL_MANAGER_PAGES.map(p => p.key),
+      });
+    }
+  }
+}
+
+function buildUserCard(u, currentEmail) {
+  const uid = u.uid || u.email?.replace(/[@.]/g, '_');
+  const isCurrentUser = (u.email||'').toLowerCase() === currentEmail;
+  const isWhitelisted = ['chinmay@gmail.com'].includes((u.email||'').toLowerCase());
+  const isOwnerRole = u.role === 'owner';
+  const canEdit = !isCurrentUser && !isWhitelisted;
+  const initials = ((u.displayName||u.email||'?').trim().slice(0,2)).toUpperCase();
+  const avatarColor = isOwnerRole ? 'var(--orange)' : '#60A5FA';
+  const allowed = Array.isArray(u.allowedPages)
+    ? u.allowedPages
+    : u.allowedPages ? Object.keys(u.allowedPages).filter(k => u.allowedPages[k])
+    : ALL_MANAGER_PAGES.map(p => p.key);
+
+  return `
+  <div class="user-row-wrap" id="wrap-${uid}">
+    <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(255,255,255,0.02)">
+      <div style="width:42px;height:42px;border-radius:50%;background:${avatarColor}20;border:2px solid ${avatarColor}44;display:grid;place-items:center;font-size:13px;font-weight:700;color:${avatarColor};flex-shrink:0">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13.5px">${escapeHtml(u.displayName||'—')}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${escapeHtml(u.email||uid)}</div>
+      </div>
+      <div style="flex-shrink:0">
+        ${(isCurrentUser||isWhitelisted)
+          ? `<span class="role-badge owner"><i class="fa-solid fa-crown"></i> Owner${isCurrentUser?' (You)':''}</span>`
+          : `<select class="role-select-inline" onchange="updateUserRole('${uid}',this.value)">
+              <option value="manager" ${u.role==='manager'?'selected':''}>Manager</option>
+              <option value="owner" ${u.role==='owner'?'selected':''}>Owner</option>
+             </select>`}
+      </div>
+      ${(!isOwnerRole && canEdit) ? `
+        <button class="btn btn-outline btn-sm" style="font-size:11.5px;flex-shrink:0;gap:5px" onclick="togglePermPanel('${uid}')">
+          <i class="fa-solid fa-sliders"></i> Manage Access
+        </button>` : ''}
+      ${canEdit
+        ? `<button class="btn btn-outline btn-sm" style="font-size:11px;padding:6px 10px;border-color:rgba(248,113,113,0.4);color:#F87171;flex-shrink:0" onclick="deleteUserRecord('${uid}','${escapeHtml(u.displayName||u.email||uid)}')"><i class="fa-solid fa-trash"></i></button>`
+        : `<span style="font-size:18px;opacity:0.4" title="Protected account">🔒</span>`}
+    </div>
+    ${(!isOwnerRole && canEdit) ? `
+    <div class="perm-panel" id="perm-${uid}">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">
+        <i class="fa-solid fa-key" style="color:var(--orange);margin-right:5px"></i>Page Access — ${escapeHtml(u.displayName||u.email)}
+      </div>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:14px">Toggle pages this manager can access. Saves instantly to Firebase.</div>
+      <div class="perm-grid">
+        ${ALL_MANAGER_PAGES.map(page => {
+          const on = allowed.includes(page.key);
+          return `<div class="perm-item${on?' on':''}" id="perm-item-${uid}-${page.key}">
+            <span class="perm-label"><i class="fa-solid ${page.icon}"></i>${page.label}</span>
+            <label class="toggle"><input type="checkbox" ${on?'checked':''} onchange="togglePageAccess('${uid}','${page.key}',this.checked)"><span class="toggle-slider"></span></label>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-subtle);display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" style="font-size:11px" onclick="grantAllPages('${uid}')"><i class="fa-solid fa-check-double"></i> Grant All</button>
+        <button class="btn btn-outline btn-sm" style="font-size:11px;border-color:rgba(248,113,113,0.35);color:#F87171" onclick="revokeAllPages('${uid}')"><i class="fa-solid fa-ban"></i> Revoke All</button>
+        <span style="font-size:11px;color:var(--text-muted)"><i class="fa-solid fa-circle-info" style="color:var(--orange)"></i> Dashboard is always owner-only.</span>
+      </div>
+    </div>` : ''}
+  </div>`;
+}
+
+function togglePermPanel(uid) {
+  const p = document.getElementById('perm-' + uid);
+  if (p) p.classList.toggle('open');
+}
+
+async function togglePageAccess(uid, page, granted) {
+  if (!isOwner() || !fb?.isConfigured) return;
+  try {
+    const snap = await fb.dbGet(fb.dbRef(fb.rtdb, `users/${uid}/allowedPages`));
+    let pages = snap.exists()
+      ? (Array.isArray(snap.val()) ? snap.val() : Object.keys(snap.val()).filter(k => snap.val()[k]))
+      : ALL_MANAGER_PAGES.map(p => p.key);
+    if (granted && !pages.includes(page)) pages.push(page);
+    if (!granted) pages = pages.filter(p => p !== page);
+    await fb.dbSet(fb.dbRef(fb.rtdb, `users/${uid}/allowedPages`), pages);
+    const item = document.getElementById(`perm-item-${uid}-${page}`);
+    if (item) item.classList.toggle('on', granted);
+    showToast(`${page} ${granted ? 'granted ✓' : 'revoked ✗'}`, granted ? 'success' : 'info');
+  } catch(e) {
+    showToast('Failed: ' + e.message, 'error');
+  }
+}
+
+async function grantAllPages(uid) {
+  if (!fb?.isConfigured) return;
+  const pages = ALL_MANAGER_PAGES.map(p => p.key);
+  await fb.dbSet(fb.dbRef(fb.rtdb, `users/${uid}/allowedPages`), pages);
+  ALL_MANAGER_PAGES.forEach(p => {
+    const cb = document.querySelector(`#perm-item-${uid}-${p.key} input`);
+    const item = document.getElementById(`perm-item-${uid}-${p.key}`);
+    if (cb) cb.checked = true;
+    if (item) item.classList.add('on');
+  });
+  showToast('All pages granted.', 'success');
+}
+
+async function revokeAllPages(uid) {
+  if (!fb?.isConfigured) return;
+  await fb.dbSet(fb.dbRef(fb.rtdb, `users/${uid}/allowedPages`), []);
+  ALL_MANAGER_PAGES.forEach(p => {
+    const cb = document.querySelector(`#perm-item-${uid}-${p.key} input`);
+    const item = document.getElementById(`perm-item-${uid}-${p.key}`);
+    if (cb) cb.checked = false;
+    if (item) item.classList.remove('on');
+  });
+  showToast('All access revoked.', 'info');
+}
+
+async function updateUserRole(uid, newRole) {
+  if (!isOwner()) { showToast('Access denied.', 'error'); return; }
+  try {
+    await fb.dbSet(fb.dbRef(fb.rtdb, `users/${uid}/role`), newRole);
+    showToast(`Role updated to ${newRole}. Takes effect on next login.`, 'success');
+  } catch(e) {
+    showToast('Failed: ' + e.message, 'error');
+  }
+}
+
+async function deleteUserRecord(uid, displayName) {
+  if (!isOwner()) { showToast('Access denied.', 'error'); return; }
+  if (!confirm(`Remove ${displayName}? Their Firebase Auth account stays active.`)) return;
+  try {
+    await fb.dbRemove(fb.dbRef(fb.rtdb, `users/${uid}`));
+    const wrap = document.getElementById('wrap-' + uid);
+    if (wrap) { wrap.style.opacity = '0'; wrap.style.transition = 'opacity 0.3s'; setTimeout(() => wrap.remove(), 300); }
+    showToast(`${displayName} removed.`, 'success');
+  } catch(e) {
+    showToast('Failed: ' + e.message, 'error');
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.remove('show');
+  if (!fb || !fb.isConfigured) {
+    errEl.textContent = 'Firebase is not configured yet. Add your project keys in the script before signing in.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (!email || !password) {
+    errEl.textContent = 'Enter both email and password.';
+    errEl.classList.add('show');
+    return;
+  }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Signing in...';
+  try {
+    await fb.signInWithEmailAndPassword(fb.auth, email, password);
+  } catch (e) {
+    errEl.textContent = 'Sign in failed: ' + (e.message || 'check your credentials.');
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+  }
+}
+function doLogout() {
+  if (fb && fb.isConfigured) fb.signOut(fb.auth);
+}
+document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ── COLLECTIONS ──────────────────────────────────────────────────
+// customers/{id}: name, mobile, altMobile, email, address, city, notes, totalSpend, lastVisit, createdAt
+// vehicles/{id}: customerId, regNumber, make, model, fuelType, year, odometer, createdAt
+// sales/{id}: customerId, vehicleId, customerName, mobile, vehicleNumber, brand, size, quantity, position,
+//             pricePerUnit, total, fitmentDate, technician, wheelAlignment, wheelBalancing, notes, createdAt
+// services/{id}: customerId, vehicleId, customerName, vehicleNumber, type, date, charge, notes, createdAt
+
+async function dataFindCustomerByMobile(mobile) {
+  if (!fb?.isConfigured) return null;
+  const q = fb.query(fb.collection(fb.db,'customers'), fb.where('mobile','==',mobile), fb.limit(1));
+  const snap = await fb.getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { id: d.id, ...d.data() };
+}
+async function dataFindCustomerByName(name) {
+  if (!fb?.isConfigured) return null;
+  const q = fb.query(fb.collection(fb.db,'customers'), fb.where('name','==',name), fb.limit(1));
+  const snap = await fb.getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { id: d.id, ...d.data() };
+}
+async function dataGetCustomer(id) {
+  if (!fb?.isConfigured || !id) return null;
+  const d = await fb.getDoc(fb.doc(fb.db,'customers',id));
+  return d.exists() ? { id: d.id, ...d.data() } : null;
+}
+async function dataUpsertCustomer(customer, existingId) {
+  // Strip empty/undefined fields to avoid Firestore rejecting undefined values
+  const clean = Object.fromEntries(Object.entries(customer).filter(([,v]) => v !== undefined && v !== null && v !== ''));
+  if (existingId) {
+    await fb.updateDoc(fb.doc(fb.db,'customers',existingId), {
+      ...clean,
+      updatedAt: fb.serverTimestamp(),
+    });
+    return existingId;
+  }
+  const docRef = await fb.addDoc(fb.collection(fb.db,'customers'), {
+    ...clean,
+    totalSpend: 0,
+    lastVisit: fb.serverTimestamp(),
+    createdAt: fb.serverTimestamp(),
+  });
+  return docRef.id;
+}
+async function dataFindVehicleByNumber(regNumber) {
+  if (!fb?.isConfigured) return null;
+  const q = fb.query(fb.collection(fb.db,'vehicles'), fb.where('regNumber','==',regNumber), fb.limit(1));
+  const snap = await fb.getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { id: d.id, ...d.data() };
+}
+async function dataUpsertVehicle(vehicle, existingId) {
+  const clean = Object.fromEntries(Object.entries(vehicle).filter(([,v]) => v !== undefined && v !== null && v !== ''));
+  // Try to find existing vehicle by reg number, but don't fail if query errors (collection may not exist yet)
+  if (!existingId && vehicle.regNumber) {
+    try { existingId = (await dataFindVehicleByNumber(vehicle.regNumber))?.id; } catch(e) { existingId = null; }
+  }
+  if (existingId) {
+    await fb.updateDoc(fb.doc(fb.db,'vehicles',existingId), { ...clean, updatedAt: fb.serverTimestamp() });
+    return existingId;
+  }
+  const docRef = await fb.addDoc(fb.collection(fb.db,'vehicles'), { ...clean, createdAt: fb.serverTimestamp() });
+  return docRef.id;
+}
+async function dataAddSale(sale) {
+  const clean = Object.fromEntries(Object.entries(sale).filter(([,v]) => v !== undefined && v !== null));
+  const docRef = await fb.addDoc(fb.collection(fb.db,'sales'), { ...clean, createdAt: fb.serverTimestamp() });
+  if (sale.customerId) {
+    await fb.updateDoc(fb.doc(fb.db,'customers',sale.customerId), {
+      totalSpend: fb.increment(sale.total || 0),
+      lastVisit: fb.serverTimestamp(),
+    });
+  }
+  return docRef.id;
+}
+async function dataAddService(service) {
+  const clean = Object.fromEntries(Object.entries(service).filter(([,v]) => v !== undefined));
+  await fb.addDoc(fb.collection(fb.db,'services'), { ...clean, createdAt: fb.serverTimestamp() });
+  if (service.customerId) {
+    await fb.updateDoc(fb.doc(fb.db,'customers',service.customerId), {
+      totalSpend: fb.increment(service.charge || 0),
+      lastVisit: fb.serverTimestamp(),
+    });
+  }
+}
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  if (isNaN(d.getTime())) return String(ts);
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+function fmtMoney(n) { return '₹' + (n || 0).toLocaleString('en-IN'); }
+
+// ── DASHBOARD ENGINE ─────────────────────────────────────────────
+// Caches
+let __dashCustomers = [];   // [{id, ...}]
+let __dashSales = [];       // [{id, ...}] sale docs with createdAt as JS Date attached (_date)
+let __dashLoaded = false;
+
+const SERVICE_LABELS = { alignment: 'Alignment', balancing: 'Balancing' };
+
+function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function endOfDay(d) { const x = new Date(d); x.setHours(23,59,59,999); return x; }
+
+function getDateRange(filterVal) {
+  const now = new Date();
+  let from, to;
+  if (filterVal === 'today') { from = startOfDay(now); to = endOfDay(now); }
+  else if (filterVal === 'yesterday') { const y = new Date(now); y.setDate(y.getDate()-1); from = startOfDay(y); to = endOfDay(y); }
+  else if (filterVal === 'week') { const d = new Date(now); const dow = (d.getDay()+6)%7; d.setDate(d.getDate()-dow); from = startOfDay(d); to = endOfDay(now); }
+  else if (filterVal === 'month') { from = new Date(now.getFullYear(), now.getMonth(), 1); to = endOfDay(now); }
+  else if (filterVal === 'quarter') { const q = Math.floor(now.getMonth()/3); from = new Date(now.getFullYear(), q*3, 1); to = endOfDay(now); }
+  else if (filterVal === 'year') { from = new Date(now.getFullYear(), 0, 1); to = endOfDay(now); }
+  else if (filterVal === 'custom') {
+    const fromEl = document.getElementById('f-date-from'), toEl = document.getElementById('f-date-to');
+    from = fromEl?.value ? startOfDay(new Date(fromEl.value)) : startOfDay(now);
+    to = toEl?.value ? endOfDay(new Date(toEl.value)) : endOfDay(now);
+  } else { from = new Date(now.getFullYear(), now.getMonth(), 1); to = endOfDay(now); }
+  return { from, to };
+}
+
+async function loadDashboardData() {
+  if (!fb?.isConfigured) return;
+  const [custSnap, salesSnap] = await Promise.all([
+    fb.getDocs(fb.collection(fb.db,'customers')),
+    fb.getDocs(fb.query(fb.collection(fb.db,'sales'), fb.limit(2000))),
+  ]);
+  __dashCustomers = custSnap.docs.map(d => {
+    const c = d.data();
+    return { id: d.id, ...c, _createdDate: c.createdAt?.toDate ? c.createdAt.toDate() : null };
+  });
+  __dashSales = salesSnap.docs.map(d => {
+    const s = d.data();
+    return { id: d.id, ...s, _date: s.createdAt?.toDate ? s.createdAt.toDate() : null };
+  });
+  // Sort descending by createdAt in JS — no Firestore composite index required
+  __dashSales.sort((a,b) => (b._date||0) - (a._date||0));
+  __dashLoaded = true;
+}
+
+// Build a map of customerId -> first purchase date, to classify new vs repeat at any point in time
+function buildFirstPurchaseMap() {
+  const map = {};
+  __dashSales.forEach(s => {
+    if (!s.customerId || !s._date) return;
+    if (!map[s.customerId] || s._date < map[s.customerId]) map[s.customerId] = s._date;
+  });
+  return map;
+}
+
+function applyDashboardFilters() {
+  const dateVal = document.getElementById('f-date')?.value || 'month';
+  const vehicleVal = document.getElementById('f-vehicle')?.value || 'all';
+  const brandVal = document.getElementById('f-brand')?.value || 'all';
+  const serviceVal = document.getElementById('f-service')?.value || 'all';
+  const custTypeVal = document.getElementById('f-custtype')?.value || 'all';
+  const { from, to } = getDateRange(dateVal);
+  const firstPurchase = buildFirstPurchaseMap();
+
+  let rows = __dashSales.filter(s => s._date && s._date >= from && s._date <= to);
+  if (vehicleVal !== 'all') rows = rows.filter(s => s.vehicleType === vehicleVal);
+  if (brandVal !== 'all') rows = rows.filter(s => s.brand === brandVal);
+  if (serviceVal === 'alignment') rows = rows.filter(s => s.wheelAlignment);
+  if (serviceVal === 'balancing') rows = rows.filter(s => s.wheelBalancing);
+  if (custTypeVal !== 'all') {
+    rows = rows.filter(s => {
+      const fp = firstPurchase[s.customerId];
+      const isFirstVisit = fp && s._date && fp.getTime() === s._date.getTime();
+      return custTypeVal === 'new' ? isFirstVisit : !isFirstVisit;
+    });
+  }
+  return { rows, from, to, dateVal, vehicleVal, brandVal, serviceVal, custTypeVal, firstPurchase };
+}
+
+function bucketRowsByPeriod(rows, from, to, dateVal) {
+  // Decide bucket granularity based on range length
+  const spanDays = Math.max(1, Math.round((to - from) / 86400000));
+  let bucketFn, labelFn, numBuckets;
+  if (dateVal === 'today' || dateVal === 'yesterday') {
+    bucketFn = d => d.getHours();
+    labelFn = h => `${h}:00`;
+    numBuckets = 24;
+  } else if (spanDays <= 31) {
+    bucketFn = d => d.getDate() - 1;
+    labelFn = i => String(i + 1);
+    numBuckets = new Date(from.getFullYear(), from.getMonth()+1, 0).getDate();
+  } else if (spanDays <= 120) {
+    // bucket by week
+    bucketFn = d => Math.floor((d - from) / (7*86400000));
+    numBuckets = Math.ceil(spanDays/7);
+    labelFn = w => `Wk ${w+1}`;
+  } else {
+    bucketFn = d => d.getMonth() + (d.getFullYear() - from.getFullYear())*12 - from.getMonth();
+    numBuckets = Math.max(1, Math.round((to.getFullYear()*12+to.getMonth()) - (from.getFullYear()*12+from.getMonth())) + 1);
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    labelFn = i => monthNames[(from.getMonth()+i)%12];
+  }
+  const buckets = Array.from({length: numBuckets}, (_, i) => ({ label: labelFn(i), value: 0 }));
+  return { buckets, bucketFn, numBuckets };
+}
+
+function computeSeriesForView(rows, from, to, dateVal, viewVal, firstPurchase) {
+  const { buckets, bucketFn } = bucketRowsByPeriod(rows, from, to, dateVal);
+  if (viewVal === 'brand') {
+    // Special case: not a time series, but brand totals
+    const totals = {};
+    rows.forEach(s => { const b = s.brand || 'Unspecified'; totals[b] = (totals[b]||0) + (s.quantity||0); });
+    return { kind: 'categorical', data: Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([label,value])=>({label,value})) };
+  }
+  rows.forEach(s => {
+    if (!s._date) return;
+    const idx = bucketFn(s._date);
+    if (idx < 0 || idx >= buckets.length) return;
+    let inc = 0;
+    if (viewVal === 'sales') inc = s.total || 0;
+    else if (viewVal === 'tyres') inc = s.quantity || 0;
+    else if (viewVal === 'services') inc = (s.wheelAlignment?300:0) + (s.wheelBalancing?200:0);
+    else if (viewVal === 'customers') { const fp = firstPurchase[s.customerId]; inc = (fp && fp.getTime()===s._date.getTime()) ? 1 : 0; }
+    else if (viewVal === 'repeat') { const fp = firstPurchase[s.customerId]; inc = (fp && fp.getTime()!==s._date.getTime()) ? 1 : 0; }
+    buckets[idx].value += inc;
+  });
+  return { kind: 'timeseries', data: buckets };
+}
+
+const VIEW_LABELS = {
+  sales: 'Sales Revenue', tyres: 'Tyres Sold', services: 'Services Revenue',
+  customers: 'Customers Added', repeat: 'Repeat Customers', brand: 'Brand Performance',
+};
+const DATE_LABELS = { today:'today', yesterday:'yesterday', week:'this week', month:'this month', quarter:'this quarter', year:'this year', custom:'selected range' };
+
+function renderSmartChart(series, viewVal, ctx) {
+  const chartEl = document.getElementById('smart-chart');
+  if (!chartEl) return;
+  chartEl.innerHTML = '';
+  const isMoney = (viewVal === 'sales' || viewVal === 'services');
+  const data = series.data;
+  const max = Math.max(1, ...data.map(d => d.value));
+
+  if (data.length === 0 || max <= 0) {
+    chartEl.style.position = 'relative';
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px';
+    overlay.innerHTML = `<i class="fa-solid fa-chart-simple" style="font-size:24px;color:var(--text-muted);opacity:0.35"></i><div style="font-size:12px;color:var(--text-muted);opacity:0.5">No data for this filter combination</div>`;
+    chartEl.appendChild(overlay);
+    return;
+  }
+
+  // Cap number of bars shown to keep readable (sample if too many, e.g. daily buckets across a year)
+  let plotData = data;
+  if (data.length > 31 && series.kind === 'timeseries') {
+    // collapse into ~24 buckets by averaging groups
+    const groupSize = Math.ceil(data.length / 24);
+    plotData = [];
+    for (let i=0;i<data.length;i+=groupSize) {
+      const chunk = data.slice(i,i+groupSize);
+      plotData.push({ label: chunk[0].label + (chunk.length>1?'–'+chunk[chunk.length-1].label:''), value: chunk.reduce((a,b)=>a+b.value,0) });
+    }
+  }
+  const max2 = Math.max(1, ...plotData.map(d=>d.value));
+
+  plotData.forEach(d => {
+    const g = document.createElement('div');
+    g.className = 'bar-group';
+    const pct = Math.max(2, Math.round((d.value/max2)*100));
+    const displayVal = isMoney ? fmtMoney(d.value) : d.value.toLocaleString('en-IN');
+    g.innerHTML = `<div class="bar" data-val="${displayVal}" style="height:${pct}%;background:linear-gradient(180deg, var(--orange-light), var(--orange))"></div><div class="bar-label">${escapeHtml(String(d.label))}</div>`;
+    chartEl.appendChild(g);
+  });
+}
+
+function updateGraphMeta(f, viewVal) {
+  const title = document.getElementById('graph-title');
+  const sub = document.getElementById('graph-subtitle');
+  if (title) title.textContent = `${VIEW_LABELS[viewVal] || 'Sales Revenue'} Trend`;
+  const parts = [];
+  parts.push(DATE_LABELS[f.dateVal] || 'this month');
+  if (f.brandVal !== 'all') parts.push(f.brandVal);
+  if (f.vehicleVal !== 'all') parts.push(f.vehicleVal);
+  if (f.serviceVal !== 'all') parts.push(SERVICE_LABELS[f.serviceVal]);
+  if (f.custTypeVal !== 'all') parts.push(f.custTypeVal === 'new' ? 'new customers' : 'repeat customers');
+  if (sub) sub.textContent = 'Showing ' + parts.join(' · ');
+}
+
+function renderTopBrands(rows) {
+  const grid = document.getElementById('top-brands-grid');
+  if (!grid) return;
+  const totals = {};
+  rows.forEach(s => { const b = s.brand; if (!b) return; totals[b] = (totals[b]||0) + (s.quantity||0); });
+  const sorted = brandList.map(b => ({ ...b, units: totals[b.name]||0 })).sort((a,b)=>b.units-a.units);
+  const max = Math.max(1, ...sorted.map(b=>b.units));
+  grid.innerHTML = sorted.map(b => `
+    <div class="brand-card">
+      <div class="brand-name" style="color:${b.color}">${escapeHtml(b.name)}</div>
+      <div class="brand-bar-wrap"><div class="brand-bar" style="background:${b.color};width:${Math.round((b.units/max)*100)}%"></div></div>
+      <div class="brand-count">${b.units} units</div>
+    </div>`).join('');
+}
+
+function renderServiceRevenue(rows) {
+  const grid = document.getElementById('service-revenue-grid');
+  if (!grid) return;
+  let alignmentRev = 0, balancingRev = 0, tyreRev = 0;
+  rows.forEach(s => {
+    if (s.wheelAlignment) alignmentRev += 300;
+    if (s.wheelBalancing) balancingRev += 200;
+    tyreRev += s.total || 0;
+  });
+  const items = [
+    { name: 'Alignment Revenue', color: '#FF6B00', val: alignmentRev },
+    { name: 'Balancing Revenue', color: '#60A5FA', val: balancingRev },
+    { name: 'Tyre Sales Revenue', color: '#4ADE80', val: tyreRev },
+  ];
+  const max = Math.max(1, ...items.map(i=>i.val));
+  grid.innerHTML = items.map(i => `
+    <div class="brand-card">
+      <div class="brand-name" style="color:${i.color}">${i.name}</div>
+      <div class="brand-bar-wrap"><div class="brand-bar" style="background:${i.color};width:${Math.round((i.val/max)*100)}%"></div></div>
+      <div class="brand-count">${fmtMoney(i.val)}</div>
+    </div>`).join('');
+}
+
+function renderCustomerIntelligence(rows, firstPurchase) {
+  const custIdsInRange = new Set(rows.map(s => s.customerId).filter(Boolean));
+  let newCount = 0, repeatCount = 0;
+  custIdsInRange.forEach(cid => {
+    const fp = firstPurchase[cid];
+    const hasFirstVisitInRange = rows.some(s => s.customerId === cid && fp && s._date && fp.getTime() === s._date.getTime());
+    if (hasFirstVisitInRange) newCount++; else repeatCount++;
+  });
+  const totalCustomers = __dashCustomers.length;
+  const purchaseCounts = {};
+  __dashSales.forEach(s => { if (s.customerId) purchaseCounts[s.customerId] = (purchaseCounts[s.customerId]||0) + 1; });
+  const repeatAllTime = Object.keys(purchaseCounts).filter(cid => purchaseCounts[cid] > 1).length;
+  const retentionPct = totalCustomers > 0 ? Math.round((repeatAllTime / totalCustomers) * 100) : 0;
+
+  document.getElementById('ci-new-customers').textContent = newCount;
+  document.getElementById('ci-repeat-customers').textContent = repeatCount;
+  document.getElementById('ci-retention-pct').textContent = retentionPct + '%';
+
+  const kpiRepeat = document.getElementById('kpi-repeat-pct');
+  if (kpiRepeat) kpiRepeat.textContent = retentionPct + '%';
+}
+
+function renderBusinessIntelligence(rows) {
+  const sizeTotals = {}, brandTotals = {}, serviceTotals = { Alignment: 0, Balancing: 0 };
+  let totalRevenue = 0, invoiceCount = rows.length;
+  const customerSet = new Set(), vehicleSet = new Set();
+  rows.forEach(s => {
+    if (s.size) sizeTotals[s.size] = (sizeTotals[s.size]||0) + (s.quantity||0);
+    if (s.brand) brandTotals[s.brand] = (brandTotals[s.brand]||0) + (s.quantity||0);
+    if (s.wheelAlignment) serviceTotals.Alignment++;
+    if (s.wheelBalancing) serviceTotals.Balancing++;
+    totalRevenue += s.total || 0;
+    if (s.customerId) customerSet.add(s.customerId);
+    if (s.vehicleId) vehicleSet.add(s.vehicleId);
+  });
+  const bestSize = Object.entries(sizeTotals).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+  const topBrand = Object.entries(brandTotals).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+  const topService = serviceTotals.Alignment >= serviceTotals.Balancing
+    ? (serviceTotals.Alignment > 0 ? 'Alignment' : '—')
+    : (serviceTotals.Balancing > 0 ? 'Balancing' : '—');
+  const avgBill = invoiceCount > 0 ? totalRevenue / invoiceCount : 0;
+  const revPerCustomer = customerSet.size > 0 ? totalRevenue / customerSet.size : 0;
+  const revPerVehicle = vehicleSet.size > 0 ? totalRevenue / vehicleSet.size : 0;
+
+  document.getElementById('bi-best-size').textContent = bestSize;
+  document.getElementById('bi-top-brand').textContent = topBrand;
+  document.getElementById('bi-top-service').textContent = topService;
+  document.getElementById('bi-avg-bill').textContent = fmtMoney(Math.round(avgBill));
+  document.getElementById('bi-rev-per-customer').textContent = fmtMoney(Math.round(revPerCustomer));
+  document.getElementById('bi-rev-per-vehicle').textContent = fmtMoney(Math.round(revPerVehicle));
+}
+
+function renderExecutiveKpis() {
+  const now = new Date();
+  const todayFrom = startOfDay(now), todayTo = endOfDay(now);
+  const monthFrom = new Date(now.getFullYear(), now.getMonth(), 1);
+  const yesterday = new Date(now); yesterday.setDate(yesterday.getDate()-1);
+  const yFrom = startOfDay(yesterday), yTo = endOfDay(yesterday);
+
+  const todayRows = __dashSales.filter(s => s._date && s._date >= todayFrom && s._date <= todayTo);
+  const yesterdayRows = __dashSales.filter(s => s._date && s._date >= yFrom && s._date <= yTo);
+  const monthRows = __dashSales.filter(s => s._date && s._date >= monthFrom && s._date <= todayTo);
+
+  const salesToday = todayRows.reduce((a,s)=>a+(s.total||0),0);
+  const salesYesterday = yesterdayRows.reduce((a,s)=>a+(s.total||0),0);
+  const tyresToday = todayRows.reduce((a,s)=>a+(s.quantity||0),0);
+  const alignmentToday = todayRows.filter(s=>s.wheelAlignment).length;
+  const balancingToday = todayRows.filter(s=>s.wheelBalancing).length;
+  const salesMonth = monthRows.reduce((a,s)=>a+(s.total||0),0);
+
+  const custToday = new Set(todayRows.map(s=>s.customerId).filter(Boolean)).size;
+  const custYesterday = new Set(yesterdayRows.map(s=>s.customerId).filter(Boolean)).size;
+
+  document.getElementById('kpi-sales-today').textContent = fmtMoney(salesToday);
+  document.getElementById('kpi-customers-today').textContent = custToday;
+  document.getElementById('kpi-tyres-today').textContent = tyresToday;
+  document.getElementById('kpi-alignment-today').textContent = alignmentToday;
+  document.getElementById('kpi-balancing-today').textContent = balancingToday;
+  document.getElementById('kpi-sales-month').textContent = fmtMoney(salesMonth);
+
+  setKpiChange('kpi-sales-today-chg', salesToday, salesYesterday, 'vs yesterday');
+  setKpiChange('kpi-customers-today-chg', custToday, custYesterday, 'vs yesterday');
+  setKpiChange('kpi-tyres-today-chg', tyresToday, yesterdayRows.reduce((a,s)=>a+(s.quantity||0),0), 'vs yesterday');
+}
+
+function setKpiChange(elId, current, previous, suffix) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (previous === 0 && current === 0) { el.innerHTML = `<i class="fa-solid fa-minus"></i> No data yet`; el.style.color = 'var(--text-muted)'; return; }
+  if (previous === 0) { el.innerHTML = `<i class="fa-solid fa-arrow-up"></i> New activity`; el.style.color = '#4ADE80'; return; }
+  const pct = Math.round(((current-previous)/previous)*100);
+  if (pct >= 0) { el.innerHTML = `<i class="fa-solid fa-arrow-up"></i> ${pct}% ${suffix}`; el.style.color = '#4ADE80'; }
+  else { el.innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${Math.abs(pct)}% ${suffix}`; el.style.color = '#F87171'; }
+}
+
+function renderRecentRegistrations() {
+  const tbody = document.getElementById('recent-registrations-body');
+  if (!tbody) return;
+  const recentRows = __dashSales.slice(0, 8);
+  if (recentRows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px 16px;"><div style="display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0.45"><i class="fa-solid fa-inbox" style="font-size:28px;color:var(--text-muted)"></i><div style="font-size:13px;color:var(--text-muted)">No registrations yet</div></div></td></tr>`;
+  } else {
+    tbody.innerHTML = recentRows.map(s => `<tr>
+      <td>${escapeHtml(s.customerName||'—')}</td>
+      <td>${escapeHtml(s.vehicleNumber||'—')}</td>
+      <td>${escapeHtml(s.mobile||'—')}</td>
+      <td>${escapeHtml(s.brand||'—')}</td>
+      <td>${fmtDate(s.createdAt)}</td>
+    </tr>`).join('');
+  }
+}
+
+function renderDashboard() {
+  const f = applyDashboardFilters();
+  const viewVal = document.getElementById('f-view')?.value || 'sales';
+  const series = computeSeriesForView(f.rows, f.from, f.to, f.dateVal, viewVal, f.firstPurchase);
+  renderSmartChart(series, viewVal, f);
+  updateGraphMeta(f, viewVal);
+  renderTopBrands(f.rows);
+  renderServiceRevenue(f.rows);
+  renderCustomerIntelligence(f.rows, f.firstPurchase);
+  renderBusinessIntelligence(f.rows);
+  renderExecutiveKpis();
+  renderRecentRegistrations();
+}
+
+function onFilterChange(which) {
+  const dateSel = document.getElementById('f-date');
+  const customGroup = document.getElementById('f-custom-range-group');
+  if (customGroup) customGroup.style.display = (dateSel?.value === 'custom') ? 'flex' : 'none';
+  renderDashboard();
+}
+
+function resetDashboardFilters() {
+  const defaults = { 'f-date':'month', 'f-vehicle':'all', 'f-brand':'all', 'f-service':'all', 'f-custtype':'all', 'f-view':'sales' };
+  Object.entries(defaults).forEach(([id,val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+  const customGroup = document.getElementById('f-custom-range-group');
+  if (customGroup) customGroup.style.display = 'none';
+  renderDashboard();
+}
+
+async function refreshDashboard() {
+  if (!fb?.isConfigured) return;
+  try {
+    await loadDashboardData();
+    renderDashboard();
+  } catch (e) { console.error('Dashboard refresh failed', e); }
+}
+
+
+
+// ── CUSTOMERS LIST ───────────────────────────────────────────────
+let __customersCache = [];
+async function renderCustomersList() {
+  if (!fb?.isConfigured) return;
+  const tbody = document.getElementById('customers-list-body');
+  try {
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'customers'), fb.limit(300)));
+    __customersCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Sort by createdAt descending in JS — no Firestore index required
+    __customersCache.sort((a,b) => {
+      const ta = a.createdAt?.toMillis?.() || a.createdAt?.seconds*1000 || 0;
+      const tb = b.createdAt?.toMillis?.() || b.createdAt?.seconds*1000 || 0;
+      return tb - ta;
+    });
+  } catch (e) { console.error(e); }
+  const term = (document.getElementById('customers-list-search')?.value || '').toLowerCase().trim();
+  let rows = __customersCache;
+  if (term) rows = rows.filter(c => (c.name||'').toLowerCase().includes(term) || (c.mobile||'').includes(term));
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px 16px;color:var(--text-muted)">No customers found</td></tr>`;
+    return;
+  }
+  const vehCounts = await getVehicleCountsByCustomer(rows.map(r=>r.id));
+  tbody.innerHTML = rows.map(c => `<tr>
+    <td>${escapeHtml(c.name||'—')}</td>
+    <td>${escapeHtml(c.mobile||'—')}</td>
+    <td>${vehCounts[c.id]||0}</td>
+    <td>${fmtDate(c.lastVisit)}</td>
+    <td>${fmtMoney(c.totalSpend)}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="openCustomerProfile('${c.id}')"><i class="fa-solid fa-eye"></i> View</button></td>
+  </tr>`).join('');
+}
+async function getVehicleCountsByCustomer(ids) {
+  const counts = {};
+  if (!ids.length) return counts;
+  const snap = await fb.getDocs(fb.collection(fb.db,'vehicles'));
+  snap.forEach(d => { const v = d.data(); if (v.customerId) counts[v.customerId] = (counts[v.customerId]||0)+1; });
+  return counts;
+}
+
+// ── CUSTOMER PROFILE ─────────────────────────────────────────────
+let __activeProfileCustomerId = null;
+async function openCustomerProfile(customerId) {
+  __activeProfileCustomerId = customerId;
+  navigate('customer-profile', null);
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-title').textContent = 'Customer Profile';
+  const customer = await dataGetCustomer(customerId);
+  if (!customer) { showToast('Customer not found','error'); return; }
+
+  document.getElementById('profile-info-card').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <div class="user-avatar" style="width:56px;height:56px;font-size:20px">${escapeHtml((customer.name||'?').slice(0,2).toUpperCase())}</div>
+      <div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700">${escapeHtml(customer.name||'—')}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${escapeHtml(customer.mobile||'—')}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+      <div><span style="color:var(--text-muted)">Email:</span> ${escapeHtml(customer.email||'—')}</div>
+      <div><span style="color:var(--text-muted)">Alt. Mobile:</span> ${escapeHtml(customer.altMobile||'—')}</div>
+      <div><span style="color:var(--text-muted)">Address:</span> ${escapeHtml(customer.address||'—')}</div>
+      <div><span style="color:var(--text-muted)">City:</span> ${escapeHtml(customer.city||'—')}</div>
+      <div><span style="color:var(--text-muted)">Last Visit:</span> ${fmtDate(customer.lastVisit)}</div>
+      <div style="padding-top:8px;border-top:1px solid var(--border-subtle)"><span style="color:var(--text-muted)">Total Spend:</span> <span style="color:var(--orange-light);font-weight:700;font-size:16px">${fmtMoney(customer.totalSpend)}</span></div>
+    </div>`;
+  document.getElementById('profile-notes').value = customer.notes || '';
+
+  const vehSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'vehicles'), fb.where('customerId','==',customerId)));
+  const vehicles = vehSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const vehList = document.getElementById('profile-vehicles-list');
+  vehList.innerHTML = vehicles.length === 0
+    ? `<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">No vehicles yet</div>`
+    : vehicles.map(v => `<div class="brand-card" style="text-align:left">
+        <div style="font-weight:700;font-family:'Rajdhani',sans-serif">${escapeHtml(v.regNumber||'—')}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px">${escapeHtml(v.make||'')} ${escapeHtml(v.model||'')} · ${escapeHtml(v.fuelType||'')} ${v.year?('· '+v.year):''}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Odometer: ${v.odometer ? v.odometer.toLocaleString('en-IN')+' km' : '—'}</div>
+      </div>`).join('');
+
+  const [salesSnap, svcSnap] = await Promise.all([
+    fb.getDocs(fb.query(fb.collection(fb.db,'sales'), fb.where('customerId','==',customerId))),
+    fb.getDocs(fb.query(fb.collection(fb.db,'services'), fb.where('customerId','==',customerId))),
+  ]);
+  const history = [];
+  salesSnap.forEach(d => { const s = d.data(); history.push({ date: s.createdAt, type: s.isFitmentOnly ? 'Fitment' : 'Tyre Sale', vehicle: s.vehicleNumber, details: `${s.brand||''} ${s.size||''} x${s.quantity||0}`.trim(), amount: s.total||0 }); });
+  svcSnap.forEach(d => { const s = d.data(); history.push({ date: s.createdAt, type: s.type||'Service', vehicle: s.vehicleNumber, details: s.notes||'', amount: s.charge||0 }); });
+  history.sort((a,b) => (b.date?.toMillis?.()||0) - (a.date?.toMillis?.()||0));
+  const histBody = document.getElementById('profile-history-body');
+  histBody.innerHTML = history.length === 0
+    ? `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No history yet</td></tr>`
+    : history.map(h => `<tr><td>${fmtDate(h.date)}</td><td><span class="badge badge-orange">${escapeHtml(h.type)}</span></td><td>${escapeHtml(h.vehicle||'—')}</td><td>${escapeHtml(h.details||'—')}</td><td>${fmtMoney(h.amount)}</td></tr>`).join('');
+}
+async function saveProfileNotes() {
+  if (!__activeProfileCustomerId) return;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'customers',__activeProfileCustomerId), { notes: document.getElementById('profile-notes').value.trim() });
+    showToast('Notes saved!','success');
+  } catch (e) { showToast('Failed to save notes: ' + e.message, 'error'); }
+}
+function openAddVehicleForProfile() {
+  showToast('Use "New Registration" to add a vehicle, linking the same mobile number.', 'info');
+  navigate('registration', document.querySelector('[data-page="registration"]'));
+}
+
+
+
+
+// ── GLOBAL SEARCH ────────────────────────────────────────────────
+let __searchDebounce = null;
+function handleGlobalSearch(term) {
+  clearTimeout(__searchDebounce);
+  term = term.trim();
+  const box = document.getElementById('global-search-results');
+  if (!term) { box.style.display = 'none'; return; }
+  __searchDebounce = setTimeout(() => runGlobalSearch(term), 300);
+}
+async function runGlobalSearch(term) {
+  const box = document.getElementById('global-search-results');
+  if (!fb?.isConfigured) { box.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--text-muted)">Connect Firebase to enable search</div>'; box.style.display='block'; return; }
+  box.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--text-muted)"><span class="spinner"></span> Searching...</div>';
+  box.style.display = 'block';
+  try {
+    const termUpper = term.toUpperCase();
+    const [custSnap, vehSnap] = await Promise.all([
+      fb.getDocs(fb.collection(fb.db,'customers')),
+      fb.getDocs(fb.collection(fb.db,'vehicles')),
+    ]);
+    const custMatches = [];
+    custSnap.forEach(d => {
+      const c = d.data();
+      if ((c.mobile||'').includes(term) || (c.name||'').toLowerCase().includes(term.toLowerCase())) {
+        custMatches.push({ id: d.id, ...c });
+      }
+    });
+    const vehMatches = [];
+    vehSnap.forEach(d => {
+      const v = d.data();
+      if ((v.regNumber||'').toUpperCase().includes(termUpper)) vehMatches.push({ id: d.id, ...v });
+    });
+    const rows = [];
+    custMatches.slice(0,6).forEach(c => rows.push(`<div style="padding:10px 14px;border-bottom:1px solid var(--border-subtle);cursor:pointer" onclick="closeSearchAndOpenProfile('${c.id}')"><div style="font-size:13px;font-weight:600">${escapeHtml(c.name||'—')}</div><div style="font-size:11px;color:var(--text-muted)">${escapeHtml(c.mobile||'')} · Customer</div></div>`));
+    for (const v of vehMatches.slice(0,6)) {
+      rows.push(`<div style="padding:10px 14px;border-bottom:1px solid var(--border-subtle);cursor:pointer" onclick="closeSearchAndOpenProfile('${v.customerId||''}')"><div style="font-size:13px;font-weight:600">${escapeHtml(v.regNumber||'—')}</div><div style="font-size:11px;color:var(--text-muted)">${escapeHtml(v.make||'')} ${escapeHtml(v.model||'')} · Vehicle</div></div>`);
+    }
+    box.innerHTML = rows.length ? rows.join('') : '<div style="padding:14px;font-size:12px;color:var(--text-muted)">No matches found</div>';
+  } catch (e) {
+    console.error(e);
+    box.innerHTML = '<div style="padding:14px;font-size:12px;color:var(--text-muted)">Search failed</div>';
+  }
+}
+function closeSearchAndOpenProfile(customerId) {
+  document.getElementById('global-search-results').style.display = 'none';
+  document.getElementById('global-search-input').value = '';
+  if (customerId) openCustomerProfile(customerId);
+}
+document.addEventListener('click', (e) => {
+  const box = document.getElementById('global-search-results');
+  const bar = e.target.closest('.search-bar');
+  if (box && !bar) box.style.display = 'none';
+});
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+
+
+</script>
+</body>
+</html>
