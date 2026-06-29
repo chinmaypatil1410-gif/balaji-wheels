@@ -2040,6 +2040,11 @@ const brandList = [
 
 // ── WIZARD ───────────────────────────────────────────────────────
 function wizardNext(step) {
+  // Pre-fill fitment date with today when entering Step 4
+  if (step === 3) {
+    const fd = document.getElementById('reg-fitment-date');
+    if (fd && !fd.value) fd.value = new Date().toISOString().slice(0, 10);
+  }
   document.getElementById('wp'+step).classList.remove('active');
   document.getElementById('wp'+(step+1)).classList.add('active');
   document.getElementById('sc'+step).classList.remove('active');
@@ -2160,7 +2165,7 @@ async function saveRegistration() {
       pricePerUnit: pricePer,
       total: qty * pricePer,
       isFitmentOnly: qty === 0 && pricePer === 0,
-      fitmentDate: document.getElementById('reg-fitment-date').value || new Date().toISOString().slice(0,10),
+      fitmentDate: document.getElementById('reg-fitment-date').value || '',
       technician: document.getElementById('reg-technician').value.trim() || '',
       wheelAlignment: document.querySelector('input[name="wa"]:checked')?.value === 'yes',
       wheelBalancing: document.querySelector('input[name="wb"]:checked')?.value === 'yes',
@@ -2174,6 +2179,7 @@ async function saveRegistration() {
 
     showToast('Registration saved successfully! 🎉','success');
     const destPage = isOwner() ? 'dashboard' : 'customers';
+    window.__dashLoaded = false; // force dashboard re-fetch after new registration
     setTimeout(() => navigate(destPage, document.querySelector(`[data-page="${destPage}"]`)), 1200);
 
   } catch (e) {
