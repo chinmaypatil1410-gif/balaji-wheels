@@ -690,6 +690,47 @@ tr:hover td { background: rgba(255,107,0,0.04) !important; }
 .wa-template-card.selected { border-color: #25D366; background: rgba(37,211,102,0.08); }
 .wa-customer-info { background: rgba(37,211,102,0.06); border-color: rgba(37,211,102,0.18); }
 
+/* ── TYRE SIZE AUTOCOMPLETE ── */
+.ts-wrap { position: relative; }
+.ts-input {
+  width: 100%; padding: 10px 36px 10px 14px;
+  border: 1.5px solid rgba(0,0,0,0.10); border-radius: var(--radius-sm);
+  font-size: 13.5px; font-family: 'Inter', sans-serif;
+  color: var(--text-primary); background: #FFFFFF;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+.ts-input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(232,93,0,0.10); }
+.ts-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(0,0,0,0.12); border: none; cursor: pointer;
+  display: none; place-items: center; font-size: 10px; color: #6B6358;
+  transition: background 0.15s;
+}
+.ts-clear.visible { display: grid; }
+.ts-clear:hover { background: rgba(232,93,0,0.18); color: var(--orange); }
+.ts-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 600;
+  background: #FFFFFF; border: 1.5px solid rgba(232,93,0,0.20);
+  border-radius: var(--radius-sm); box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  max-height: 240px; overflow-y: auto; display: none;
+  scroll-behavior: smooth;
+}
+.ts-dropdown.open { display: block; animation: fadeIn 0.12s ease; }
+.ts-option {
+  padding: 9px 14px; font-size: 13px; cursor: pointer;
+  color: var(--text-primary); border-bottom: 1px solid rgba(0,0,0,0.04);
+  display: flex; align-items: center; gap: 8px;
+  transition: background 0.1s;
+}
+.ts-option:last-child { border-bottom: none; }
+.ts-option:hover, .ts-option.active { background: rgba(232,93,0,0.07); }
+.ts-option.active { border-left: 3px solid var(--orange); }
+.ts-option .ts-match { color: var(--orange); font-weight: 700; }
+.ts-option .ts-icon { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+.ts-empty { padding: 14px; text-align: center; font-size: 13px; color: var(--text-muted); }
+
 /* ── WHATSAPP MODULE ── */
 .btn-whatsapp {
   display: inline-flex; align-items: center; gap: 8px;
@@ -1420,7 +1461,14 @@ tr:hover td { background: rgba(255,107,0,0.04) !important; }
         <div class="form-group"><label class="form-label">Tyre Brand *</label>
           <select class="form-select" id="reg-tyre-brand"><option value="">Select Brand</option><option>Yokohama</option><option>Bridgestone</option><option>Goodyear</option><option>JK Tyre</option><option>Apollo</option><option>Pirelli</option></select>
         </div>
-        <div class="form-group"><label class="form-label">Tyre Size *</label><input class="form-input" type="text" id="reg-tyre-size" placeholder=""></div>
+        <div class="form-group">
+  <label class="form-label">Tyre Size *</label>
+  <div class="ts-wrap" id="ts-wrap">
+    <input class="ts-input" type="text" id="reg-tyre-size" placeholder="" autocomplete="off" oninput="tsOnInput(this.value)" onfocus="tsOnFocus()" onkeydown="tsOnKeydown(event)">
+    <button class="ts-clear" id="ts-clear" onclick="tsClear()" tabindex="-1" title="Clear">✕</button>
+    <div class="ts-dropdown" id="ts-dropdown"></div>
+  </div>
+</div>
         <div class="form-group"><label class="form-label">Quantity</label>
           <select class="form-select" id="reg-tyre-qty" onchange="calcRegTotal()"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select>
         </div>
@@ -4341,6 +4389,249 @@ ${tableHTML}
 function printReport() {
   exportReportPDF();
 }
+
+
+// ══════════════════════════════════════════════════════════════════
+// TYRE SIZE AUTOCOMPLETE MODULE — Balaji Wheels CRM
+// ══════════════════════════════════════════════════════════════════
+
+// ── Comprehensive passenger-car tyre size database ────────────────
+const TYRE_DB = [
+  // R10
+  "125/70R10","135/70R10",
+  // R12
+  "125/80R12","135/70R12","135/80R12","145/70R12","145/80R12","155/70R12","155/80R12","165/70R12",
+  // R13
+  "135/70R13","145/65R13","145/70R13","145/80R13","155/65R13","155/70R13","155/80R13",
+  "165/65R13","165/70R13","165/80R13","175/60R13","175/65R13","175/70R13","185/60R13","185/65R13",
+  // R14
+  "155/65R14","155/70R14","165/60R14","165/65R14","165/70R14","165/75R14",
+  "175/60R14","175/65R14","175/70R14","175/75R14",
+  "185/55R14","185/60R14","185/65R14","185/70R14","185/75R14",
+  "195/55R14","195/60R14","195/65R14","195/70R14","195/75R14",
+  "205/60R14","205/65R14","205/70R14","215/60R14","215/65R14",
+  // R15
+  "155/65R15","155/80R15",
+  "165/60R15","165/65R15","165/70R15",
+  "175/55R15","175/60R15","175/65R15","175/70R15",
+  "185/50R15","185/55R15","185/60R15","185/65R15","185/70R15","185/75R15",
+  "195/45R15","195/50R15","195/55R15","195/60R15","195/65R15","195/70R15","195/75R15",
+  "205/50R15","205/55R15","205/60R15","205/65R15","205/70R15","205/75R15",
+  "215/55R15","215/60R15","215/65R15","215/70R15",
+  "225/55R15","225/60R15","225/65R15","225/70R15","225/75R15",
+  "235/60R15","235/65R15","235/70R15","235/75R15",
+  "245/60R15","245/65R15","245/70R15","245/75R15",
+  "255/60R15","255/65R15","255/70R15",
+  "265/70R15","275/70R15",
+  "31x10.50R15","32x11.50R15","33x12.50R15",
+  // R16
+  "185/55R16","185/60R16",
+  "195/45R16","195/50R16","195/55R16","195/60R16","195/65R16",
+  "205/45R16","205/50R16","205/55R16","205/60R16","205/65R16","205/70R16","205/75R16",
+  "215/45R16","215/50R16","215/55R16","215/60R16","215/65R16","215/70R16",
+  "225/45R16","225/50R16","225/55R16","225/60R16","225/65R16","225/70R16","225/75R16",
+  "235/50R16","235/55R16","235/60R16","235/65R16","235/70R16","235/80R16",
+  "245/55R16","245/60R16","245/65R16","245/70R16","245/75R16",
+  "255/60R16","255/65R16","255/70R16",
+  "265/65R16","265/70R16","265/75R16",
+  "275/65R16","275/70R16",
+  "285/65R16","285/70R16",
+  // R17
+  "195/40R17","205/40R17","205/45R17",
+  "215/40R17","215/45R17","215/50R17","215/55R17","215/60R17","215/65R17",
+  "225/40R17","225/45R17","225/50R17","225/55R17","225/60R17","225/65R17",
+  "235/40R17","235/45R17","235/50R17","235/55R17","235/60R17","235/65R17",
+  "245/40R17","245/45R17","245/55R17","245/60R17","245/65R17","245/70R17",
+  "255/45R17","255/55R17","255/60R17","255/65R17",
+  "265/50R17","265/55R17","265/60R17","265/65R17","265/70R17",
+  "275/55R17","275/60R17","275/65R17","275/70R17",
+  "285/55R17","285/60R17","285/65R17",
+  "295/55R17","295/60R17","295/65R17",
+  "305/60R17","305/65R17",
+  // R18
+  "215/40R18","215/45R18","215/50R18","215/55R18",
+  "225/35R18","225/40R18","225/45R18","225/50R18","225/55R18","225/60R18",
+  "235/40R18","235/45R18","235/50R18","235/55R18","235/60R18","235/65R18",
+  "245/35R18","245/40R18","245/45R18","245/50R18","245/55R18","245/60R18",
+  "255/35R18","255/40R18","255/45R18","255/50R18","255/55R18","255/60R18",
+  "265/35R18","265/40R18","265/50R18","265/55R18","265/60R18","265/65R18",
+  "275/35R18","275/40R18","275/45R18","275/50R18","275/55R18","275/60R18","275/65R18",
+  "285/35R18","285/40R18","285/45R18","285/55R18","285/60R18","285/65R18",
+  "295/35R18","295/40R18","295/45R18","295/55R18","295/60R18",
+  "305/35R18","305/40R18","305/45R18",
+  "315/35R18","315/40R18","315/45R18",
+  "325/30R18","325/35R18",
+  "335/25R18","335/30R18",
+  // R19
+  "225/35R19","225/40R19","225/45R19","225/50R19","225/55R19",
+  "235/35R19","235/40R19","235/45R19","235/50R19","235/55R19",
+  "245/35R19","245/40R19","245/45R19","245/50R19","245/55R19",
+  "255/35R19","255/40R19","255/45R19","255/50R19","255/55R19",
+  "265/30R19","265/35R19","265/40R19","265/50R19",
+  "275/30R19","275/35R19","275/40R19","275/45R19","275/50R19",
+  "285/30R19","285/35R19","285/40R19","285/45R19",
+  "295/30R19","295/35R19","295/40R19","295/45R19",
+  "305/30R19","305/35R19","305/40R19",
+  "315/30R19","315/35R19",
+  "325/30R19","335/30R19",
+  // R20
+  "235/35R20","245/35R20","245/40R20","245/45R20","245/50R20",
+  "255/30R20","255/35R20","255/40R20","255/45R20","255/50R20","255/55R20",
+  "265/35R20","265/40R20","265/45R20","265/50R20",
+  "275/30R20","275/35R20","275/40R20","275/45R20","275/50R20","275/55R20","275/60R20",
+  "285/30R20","285/35R20","285/40R20","285/45R20","285/50R20",
+  "295/30R20","295/35R20","295/40R20","295/45R20",
+  "305/30R20","305/35R20","305/40R20","305/45R20",
+  "315/30R20","315/35R20",
+  "325/25R20","325/30R20","325/35R20",
+  "335/25R20","335/30R20",
+  "345/25R20","345/30R20",
+  // R21
+  "235/40R21","245/35R21","245/40R21","245/45R21",
+  "255/30R21","255/35R21","255/40R21","255/45R21",
+  "265/35R21","265/40R21","265/45R21",
+  "275/30R21","275/35R21","275/40R21","275/45R21",
+  "285/30R21","285/35R21","285/40R21","285/45R21",
+  "295/30R21","295/35R21","295/40R21",
+  "305/30R21","305/35R21",
+  "315/30R21","325/30R21",
+  // R22
+  "245/30R22","255/30R22","255/35R22","255/40R22",
+  "265/30R22","265/35R22","265/40R22",
+  "275/30R22","275/35R22","275/40R22","275/45R22",
+  "285/30R22","285/35R22","285/40R22","285/45R22",
+  "295/30R22","295/35R22","295/40R22",
+  "305/30R22","305/35R22","305/40R22",
+  "315/30R22","315/35R22",
+  "325/30R22","335/30R22",
+  // R24
+  "255/30R24","265/30R24","275/25R24","275/30R24",
+  "285/25R24","285/30R24","295/25R24","295/30R24",
+  "305/25R24","305/30R24","315/25R24","315/30R24",
+  "325/25R24","335/25R24","345/25R24",
+];
+
+// ── State ─────────────────────────────────────────────────────────
+let _tsActive  = -1;   // keyboard highlighted index
+let _tsVisible = [];   // currently filtered list
+let _tsOpen    = false;
+
+// ── Search engine — ranked, highlighted ──────────────────────────
+function tsSearch(q) {
+  if (!q) return [];
+  const qu = q.toUpperCase().replace(/\s/g,'');
+  const exact=[], startsWith=[], contains=[];
+  for (const t of TYRE_DB) {
+    const tu = t.replace(/\s/g,'');
+    if (tu === qu)                       exact.push(t);
+    else if (tu.startsWith(qu))          startsWith.push(t);
+    else if (tu.includes(qu))            contains.push(t);
+  }
+  return [...exact, ...startsWith, ...contains];
+}
+
+function tsHighlight(text, q) {
+  if (!q) return escapeHtml(text);
+  const idx = text.toUpperCase().indexOf(q.toUpperCase().replace(/\s/g,''));
+  if (idx < 0) return escapeHtml(text);
+  return escapeHtml(text.slice(0,idx)) +
+    '<span class="ts-match">' + escapeHtml(text.slice(idx, idx+q.length)) + '</span>' +
+    escapeHtml(text.slice(idx+q.length));
+}
+
+// ── Render dropdown ───────────────────────────────────────────────
+function tsRender(q) {
+  const dd = document.getElementById('ts-dropdown');
+  if (!dd) return;
+  _tsVisible = tsSearch(q);
+  _tsActive  = -1;
+
+  if (!_tsVisible.length) {
+    dd.innerHTML = '<div class="ts-empty"><i class="fa-solid fa-circle-xmark"></i> No tyre size found</div>';
+  } else {
+    dd.innerHTML = _tsVisible.slice(0, 80).map((t, i) =>
+      `<div class="ts-option" data-i="${i}" onmousedown="tsSelect('${t}')" onmouseover="tsHover(${i})">
+        <i class="fa-solid fa-circle-dot ts-icon"></i>
+        <span>${tsHighlight(t, q)}</span>
+      </div>`
+    ).join('');
+  }
+  tsOpenDrop();
+}
+
+function tsOpenDrop() {
+  const dd = document.getElementById('ts-dropdown');
+  if (dd) { dd.classList.add('open'); _tsOpen = true; }
+}
+function tsCloseDrop() {
+  const dd = document.getElementById('ts-dropdown');
+  if (dd) { dd.classList.remove('open'); _tsOpen = false; _tsActive = -1; }
+}
+
+// ── Highlight active keyboard item ────────────────────────────────
+function tsSetActive(i) {
+  const items = document.querySelectorAll('#ts-dropdown .ts-option');
+  items.forEach(el => el.classList.remove('active'));
+  if (i >= 0 && i < items.length) {
+    items[i].classList.add('active');
+    items[i].scrollIntoView({ block: 'nearest' });
+  }
+  _tsActive = i;
+}
+
+// ── Event handlers ────────────────────────────────────────────────
+function tsOnInput(val) {
+  const clear = document.getElementById('ts-clear');
+  if (clear) clear.classList.toggle('visible', val.length > 0);
+  if (val.length === 0) { tsCloseDrop(); return; }
+  tsRender(val);
+}
+
+function tsOnFocus() {
+  const inp = document.getElementById('reg-tyre-size');
+  if (inp && inp.value.length > 0) tsRender(inp.value);
+}
+
+function tsOnKeydown(e) {
+  if (!_tsOpen) return;
+  const max = Math.min(_tsVisible.length, 80);
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    tsSetActive(Math.min(_tsActive + 1, max - 1));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    tsSetActive(Math.max(_tsActive - 1, 0));
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (_tsActive >= 0 && _tsVisible[_tsActive]) tsSelect(_tsVisible[_tsActive]);
+  } else if (e.key === 'Escape') {
+    tsCloseDrop();
+  }
+}
+
+function tsHover(i) { tsSetActive(i); }
+
+function tsSelect(size) {
+  const inp = document.getElementById('reg-tyre-size');
+  if (inp) inp.value = size;
+  const clear = document.getElementById('ts-clear');
+  if (clear) clear.classList.add('visible');
+  tsCloseDrop();
+}
+
+function tsClear() {
+  const inp = document.getElementById('reg-tyre-size');
+  if (inp) { inp.value = ''; inp.focus(); }
+  const clear = document.getElementById('ts-clear');
+  if (clear) clear.classList.remove('visible');
+  tsCloseDrop();
+}
+
+// Close on outside click
+document.addEventListener('mousedown', function(e) {
+  const wrap = document.getElementById('ts-wrap');
+  if (wrap && !wrap.contains(e.target)) tsCloseDrop();
+});
 
 function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
